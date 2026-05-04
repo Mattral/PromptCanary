@@ -1,0 +1,155 @@
+name: PromptCanary Drift Check
+
+# ── When to run ───────────────────────────────────────────────────────────────
+# Scheduled: every Monday at 09:00 UTC — catches weekend silent provider updates.
+# Manual: dispatch from the GitHub UI with optional provider override.
+# PR: runs on pull requests to catch config regressions.
+
+on:
+  schedule:
+    - cron: "0 9 * * 1"      # Every Monday, 9am UTC
+  workflow_dispatch:
+    inputs:
+      provider:
+        description: "LiteLLM model string to test"
+        required: false
+        default: "openai/gpt-4o"
+      fail_on_drift:
+        description: "Fail the job if drift is detected"
+        required: false
+        default: "true"
+  pull_request:
+    paths:
+      - "canary.yaml"
+      - "baselines/**"
+      - ".github/workflows/promptcanary.yml"
+
+# ── Jobs ──────────────────────────────────────────────────────────────────────
+jobs:
+  canary:
+    name: Behavioral Drift Check
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write      # to open a GitHub issue on drift
+      contents: write    # to commit updated baselines (optional)
+      pull-requests: write  # to post PR comments
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Install PromptCanary
+        run: pip install promptcanary
+
+      # ── Run canary ──────────────────────────────────────────────────────────
+      - name: Run canary suite
+        id: canary_run
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: |
+          PROVIDER="${{ github.event.inputs.provider || 'openai/gpt-4o' }}"
+          echo "Running canary against provider: $PROVIDER"
+
+          promptcanary run \
+            --config canary.yaml \
+            --provider "$PROVIDER" \
+            --output-json results.json \
+            --output-md report.md \
+            --output-html report.html \
+            --no-progress
+
+          echo "provider=$PROVIDER" >> $GITHUB_OUTPUT
+
+      # ── Compare to baseline ─────────────────────────────────────────────────
+      - name: Compare to baseline
+        id: compare
+        run: |
+          PROVIDER="${{ steps.canary_run.outputs.provider }}"
+          BASELINE=$(ls baselines/ | grep "${PROVIDER//\//-}" | sort -r | head -1)
+
+          if [ -z "$BASELINE" ]; then
+            echo "No baseline found. Saving this run as the new baseline."
+            promptcanary run \
+              --config canary.yaml \
+              --provider "$PROVIDER" \
+              --save-baseline \
+              --no-progress
+            echo "drift_detected=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          echo "Comparing to baseline: baselines/$BASELINE"
+
+          # Compare and generate drift report
+          promptcanary compare \
+            --baseline "baselines/$BASELINE" \
+            --current results.json \
+            --output-md drift_report.md \
+            --output-html drift_report.html \
+            ${{ (github.event.inputs.fail_on_drift || 'true') == 'true' && '--fail-on-drift' || '' }} \
+            && echo "drift_detected=false" >> $GITHUB_OUTPUT \
+            || echo "drift_detected=true" >> $GITHUB_OUTPUT
+
+      # ── Upload reports ──────────────────────────────────────────────────────
+      - name: Upload reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: promptcanary-reports-${{ github.run_id }}
+          path: |
+            results.json
+            report.md
+            report.html
+            drift_report.md
+            drift_report.html
+          retention-days: 30
+
+      # ── Post PR comment ─────────────────────────────────────────────────────
+      - name: Post drift report as PR comment
+        if: github.event_name == 'pull_request' && always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const report = fs.existsSync('drift_report.md')
+              ? fs.readFileSync('drift_report.md', 'utf8')
+              : fs.readFileSync('report.md', 'utf8');
+
+            const body = `## 🐦 PromptCanary Report\n\n${report.substring(0, 65000)}`;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: body
+            });
+
+      # ── Open issue on drift ─────────────────────────────────────────────────
+      - name: Open GitHub issue on drift
+        if: steps.compare.outputs.drift_detected == 'true' && github.event_name == 'schedule'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const report = fs.existsSync('drift_report.md')
+              ? fs.readFileSync('drift_report.md', 'utf8')
+              : 'Drift detected. See workflow run for details.';
+
+            const title = `🚨 PromptCanary: Behavioral drift detected — ${new Date().toISOString().split('T')[0]}`;
+            const body = `## Drift Detected\n\nPromptCanary detected behavioral drift in your LLM provider.\n\n${report.substring(0, 60000)}\n\n[View full report in workflow run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})`;
+
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: title,
+              body: body,
+              labels: ['promptcanary', 'drift-detected', 'llm-ops']
+            });

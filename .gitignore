@@ -1,0 +1,86 @@
+# ── Python ────────────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+.installed.cfg
+MANIFEST
+
+# ── Virtual environments ──────────────────────────────────────────────────────
+.venv/
+venv/
+env/
+ENV/
+.env
+.venv
+env.bak/
+venv.bak/
+
+# ── Testing & Coverage ────────────────────────────────────────────────────────
+.pytest_cache/
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+.tox/
+nosetests.xml
+pytest.xml
+
+# ── Type checking ─────────────────────────────────────────────────────────────
+.mypy_cache/
+.dmypy.json
+dmypy.json
+.pyright/
+
+# ── Linting ───────────────────────────────────────────────────────────────────
+.ruff_cache/
+
+# ── Jupyter ───────────────────────────────────────────────────────────────────
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# ── IDE ───────────────────────────────────────────────────────────────────────
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# ── PromptCanary specific ─────────────────────────────────────────────────────
+# Baselines committed to git are intentional — only ignore generated reports
+results.json
+report.md
+report.html
+drift_report.md
+drift_report.html
+
+# Secrets (never commit API keys)
+.env
+.env.local
+.env.*.local
+secrets.yaml
+secrets.json
+
+# ── Distribution ──────────────────────────────────────────────────────────────
+dist/
+*.tar.gz
+*.whl
+
+# ── Docs build ───────────────────────────────────────────────────────────────
+site/
+docs/_build/
