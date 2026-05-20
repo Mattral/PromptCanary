@@ -1,0 +1,121 @@
+site_name: PromptCanary
+site_description: Detect silent behavioral drift in LLM providers — before it breaks production.
+site_url: https://promptcanary.readthedocs.io
+repo_url: https://github.com/promptcanary/promptcanary
+repo_name: promptcanary/promptcanary
+edit_uri: edit/main/docs/
+
+theme:
+  name: material
+  palette:
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.indexes
+    - navigation.top
+    - content.code.copy
+    - content.code.annotate
+    - search.suggest
+    - search.highlight
+    - toc.follow
+  icon:
+    repo: fontawesome/brands/github
+  logo: assets/logo.svg
+  favicon: assets/favicon.svg
+
+nav:
+  - Home: index.md
+  - Getting Started:
+      - Installation: getting-started/installation.md
+      - Quick Start: getting-started/quickstart.md
+      - Your First Canary Suite: getting-started/first-suite.md
+  - Core Concepts:
+      - Overview: concepts/overview.md
+      - CanarySuite: concepts/canary-suite.md
+      - Probes: concepts/probes.md
+      - Baselines & Comparison: concepts/baselines.md
+      - Drift Reports: concepts/drift-reports.md
+  - Probe Reference:
+      - All Probes: probes/index.md
+      - Format & Structure: probes/format.md
+      - Reasoning Style: probes/reasoning.md
+      - Safety & Refusal: probes/safety.md
+      - Tool Use: probes/tool-use.md
+      - Factual: probes/factual.md
+      - Writing Custom Probes: probes/custom.md
+  - Providers:
+      - Supported Providers: providers/index.md
+      - OpenAI: providers/openai.md
+      - Anthropic: providers/anthropic.md
+      - Google Gemini: providers/gemini.md
+      - Local Models (Ollama): providers/ollama.md
+  - Running in CI/CD:
+      - GitHub Actions: ci-cd/github-actions.md
+      - Multi-Provider Matrix: ci-cd/multi-provider.md
+      - Baseline Promotion: ci-cd/baseline-promotion.md
+  - Integration Guides:
+      - LangChain: integrations/langchain.md
+      - FastAPI Apps: integrations/fastapi.md
+  - Visualization: visualization.md
+  - CLI Reference: cli-reference.md
+  - API Reference: api-reference.md
+  - Architecture Decision Records: decision-log.md
+  - Contributing: contributing.md
+  - Changelog: changelog.md
+
+plugins:
+  - search
+  - exclude:
+      glob:
+        - sync_root_docs.py
+  - mkdocstrings:
+      handlers:
+        python:
+          options:
+            show_source: true
+            show_root_heading: true
+            docstring_style: google
+            merge_init_into_class: true
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - attr_list
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/promptcanary/promptcanary
+    - icon: fontawesome/brands/python
+      link: https://pypi.org/project/promptcanary/
+
+copyright: Copyright &copy; 2026 PromptCanary Contributors — MIT License
