@@ -1,0 +1,41 @@
+name: Deploy Docs
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "docs/**"
+      - "mkdocs.yml"
+      - "DECISION_LOG.md"
+      - "CONTRIBUTING.md"
+      - "CHANGELOG.md"
+      - "promptcanary/**"   # docstrings feed mkdocstrings API reference
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Install package + docs dependencies
+        run: |
+          pip install -e ".[docs]"
+
+      - name: Sync root-level docs into docs/
+        run: python docs/sync_root_docs.py
+
+      - name: Build docs (strict mode — fails on broken links)
+        run: mkdocs build --strict
+
+      - name: Deploy to GitHub Pages
+        run: mkdocs gh-deploy --force --no-history
