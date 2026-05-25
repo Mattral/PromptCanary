@@ -18,7 +18,7 @@ Usage:
     python examples/quickstart.py
 
     # Real provider:
-    OPENAI_API_KEY=sk-... python examples/quickstart.py --real openai/gpt-4o
+    OPENAI_API_KEY=sk-... python examples/quickstart.py --real openai/gpt-5.4
 """
 
 from __future__ import annotations
@@ -222,7 +222,7 @@ def run_demo(real_provider: str | None = None) -> None:
             "[bold]What to do next:[/bold]\n\n"
             "  1. Edit [cyan]examples/canary.yaml[/cyan] with your own prompts\n"
             "  2. Run: [cyan]promptcanary init my-suite[/cyan]\n"
-            "  3. Run: [cyan]promptcanary run --provider openai/gpt-4o --save-baseline[/cyan]\n"
+            "  3. Run: [cyan]promptcanary run --provider openai/gpt-5.4 --save-baseline[/cyan]\n"
             "  4. Add [cyan].github/workflows/promptcanary.yml[/cyan] to your repo\n"
             "  5. Get notified when your provider silently drifts 🐦\n\n"
             "  [dim]Docs: https://github.com/promptcanary/promptcanary[/dim]",
@@ -236,7 +236,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--real",
         metavar="MODEL",
-        help='Use a real LiteLLM provider (e.g. "openai/gpt-4o"). Requires API key in env.',
+        help='Use a real LiteLLM provider (e.g. "openai/gpt-5.4"). Requires API key in env.',
         default=None,
     )
     args = parser.parse_args()
