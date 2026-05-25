@@ -18,6 +18,43 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.2.1] — 2026-07-03
+
+### Fixed
+
+**CI pipeline (all four checks now pass cleanly: ruff check, ruff format, mypy strict, pytest)**
+- `pyproject.toml` — added `hypothesis`, `typer[all]` to `[dev]` extras; these were required by the test suite (`tests/unit/test_property_based.py`, `tests/unit/test_cli.py`) but missing from the dependency declaration, causing `ModuleNotFoundError` in CI
+- `.github/workflows/ci.yml` — the `lint` job installed a hand-rolled dependency list instead of `pip install -e ".[dev]"`; this duplicated `pyproject.toml`'s dependencies by hand and had already drifted out of sync (missing `hypothesis`, `PyYAML` version pin, etc.). Now uses the single source of truth. Also extended lint/format checks to cover `tests/`, not just `promptcanary/`.
+- `pyproject.toml` — removed redundant `typer[all]` from `[dev]` extras (triggered a deprecation warning on install: newer `typer` releases folded the `[all]` extra's contents — `rich`, `shellingham` — into core dependencies, and `rich` was already declared separately in the base `dependencies` list)
+- **35 files reformatted** with `ruff format` — the formatter had never actually been run against the codebase; `ruff format --check` was failing on 22 of 35 source/test files despite `ruff check` (linting) passing
+- **15 mypy strict-mode errors resolved** across 7 files:
+  - Removed 8 redundant `# type: ignore[import-untyped]` comments — `pyproject.toml` already sets `ignore_missing_imports = true` project-wide, making per-line ignores dead code that mypy strict mode correctly flags as unused
+  - `core/suite.py` — `_NoopContext` (the progress-bar no-op fallback) now implements `add_task()`/`update()` matching Rich's `Progress` API, returning a proper `TaskID`; this removes two `union-attr` errors and lets the `if show_progress:` guards around progress calls be deleted entirely, since both branches now share an interface
+  - `core/probes/tool_use.py` — `_find_args()` now narrows through a local variable before returning, fixing a `no-any-return` error where `obj[k]` on an `Any`-typed dict couldn't be verified as `dict[str, Any]` despite the preceding `isinstance` check
+  - `core/probes/reasoning.py` — `VerbosityProbe.evaluate()`'s `meta` dict is now explicitly typed `dict[str, Any]`; it holds both `int` (word counts) and `float` (ratio) values across branches, which mypy's inferred `dict[str, int]` from the first assignment couldn't accommodate
+  - `cli.py` — the `report` command's format-detection branch (`DriftReport` vs `CanaryRunResult`) now declares explicit `obj: CanaryRunResult | DriftReport` and `reporter_obj: Reporter | DriftReporter` union types, since the two branches assign genuinely different, unrelated types to the same variable names
+
+**Test coverage**
+- `promptcanary/providers/litellm.py`: **21% → 100% coverage.** Added `tests/unit/test_litellm_provider.py` (29 tests) covering `LiteLLMProvider.complete()`'s full request-building and response-parsing logic — message construction (system prompt included/excluded), parameter forwarding (temperature, max_tokens, seed, extra_params), token usage extraction, `raw_response` capture, and all three error paths (missing `litellm` package, API call failure with status-code preservation, malformed response structure). Mocks `litellm.completion()` directly per ADR-008 — zero real network calls.
+- Overall coverage: **89% → 92%** (264 tests, up from 235)
+
+### Added
+
+- `CODE_OF_CONDUCT.md` — full Contributor Covenant v2.1 text; previously referenced by `CONTRIBUTING.md` but the file itself didn't exist
+- `.github/ISSUE_TEMPLATE/bug_report.yml`, `.github/ISSUE_TEMPLATE/feature_request.yml`, `.github/ISSUE_TEMPLATE/config.yml` — structured issue forms, blank issues disabled, links to Discussions and the security policy
+- `.github/PULL_REQUEST_TEMPLATE.md` — PR checklist matching `CONTRIBUTING.md`'s stated requirements
+- `docs/integrations/llamaindex.md` — LlamaIndex integration guide (direct-LLM and query-engine-wrapping patterns, retrieval-drift-specific custom probe example); explicitly named in the original project guideline's integration list but was missing
+- `docs/sync_root_docs.py` — now rewrites cross-references between mirrored root docs (e.g. a link to `CODE_OF_CONDUCT.md` inside `CONTRIBUTING.md` resolves to `code-of-conduct.md` in the mirrored copy) so `mkdocs build --strict` stays clean without touching the root source files' correct GitHub-relative links
+- `examples/multi_provider.py` — runs the same suite across OpenAI, Anthropic, and Ollama simultaneously (with a `--mock` flag for no-API-key exploration), with a cross-provider comparison table and an interpretation guide for distinguishing provider-specific drift from harness-level regressions
+- `examples/custom_probe_example.py` — three complete custom-probe patterns (`@probe` decorator, `BaseProbe` subclass, and a full production-grade JSON-API-contract probe with partial scoring) runnable end-to-end with no API key
+
+### Changed
+
+- `docs.yml` — added `CODE_OF_CONDUCT.md` to the docs-rebuild trigger paths
+- `mkdocs.yml` — added Code of Conduct and LlamaIndex pages to nav
+
+---
+
 ## [0.2.0] — 2026-06-30
 
 ### Added
@@ -184,6 +221,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-[Unreleased]: https://github.com/promptcanary/promptcanary/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/promptcanary/promptcanary/compare/v0.2.1...HEAD
+[0.2.1]: https://github.com/promptcanary/promptcanary/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/promptcanary/promptcanary/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/promptcanary/promptcanary/releases/tag/v0.1.0
