@@ -20,7 +20,6 @@ from promptcanary.core.models import (
     BaselineSnapshot,
     CanaryRunResult,
     DriftReport,
-    ProbeCategory,
     ProbeComparison,
     ProbeResult,
 )
@@ -56,12 +55,10 @@ def compare(
 
     # Index baseline probe results by (probe_id, prompt_id)
     baseline_index: dict[tuple[str, str], ProbeResult] = {
-        (r.probe_id, r.prompt_id): r
-        for r in baseline.run_result.probe_results
+        (r.probe_id, r.prompt_id): r for r in baseline.run_result.probe_results
     }
     current_index: dict[tuple[str, str], ProbeResult] = {
-        (r.probe_id, r.prompt_id): r
-        for r in current.probe_results
+        (r.probe_id, r.prompt_id): r for r in current.probe_results
     }
 
     # All keys in both baseline and current
@@ -90,23 +87,11 @@ def compare(
             probe_name = c_result.probe_name
 
         delta = c_score - b_score
-        regression = (
-            b_passed
-            and not c_passed
-            and delta <= -regression_threshold
-        ) or (
-            not b_passed
-            and not c_passed
-            and delta <= -regression_threshold
+        regression = (b_passed and not c_passed and delta <= -regression_threshold) or (
+            not b_passed and not c_passed and delta <= -regression_threshold
         )
-        improvement = (
-            not b_passed
-            and c_passed
-            and delta >= improvement_threshold
-        ) or (
-            b_passed
-            and c_passed
-            and delta >= improvement_threshold
+        improvement = (not b_passed and c_passed and delta >= improvement_threshold) or (
+            b_passed and c_passed and delta >= improvement_threshold
         )
 
         comparisons.append(
@@ -138,7 +123,7 @@ def compare(
 
 
 def _score_to_grade(score: float) -> str:
-    """Convert a 0–1 score to a letter grade string."""
+    """Convert a 0-1 score to a letter grade string."""
     if score >= 0.95:
         return "A"
     if score >= 0.85:
@@ -151,7 +136,7 @@ def _score_to_grade(score: float) -> str:
 
 
 def score_to_emoji(score: float) -> str:
-    """Convert a 0–1 score to a colour-coded emoji for reports."""
+    """Convert a 0-1 score to a colour-coded emoji for reports."""
     if score >= 0.95:
         return "🟢"
     if score >= 0.80:
