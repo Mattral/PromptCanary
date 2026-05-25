@@ -69,12 +69,14 @@ nav:
       - Baseline Promotion: ci-cd/baseline-promotion.md
   - Integration Guides:
       - LangChain: integrations/langchain.md
+      - LlamaIndex: integrations/llamaindex.md
       - FastAPI Apps: integrations/fastapi.md
   - Visualization: visualization.md
   - CLI Reference: cli-reference.md
   - API Reference: api-reference.md
   - Architecture Decision Records: decision-log.md
   - Contributing: contributing.md
+  - Code of Conduct: code-of-conduct.md
   - Changelog: changelog.md
 
 plugins:
