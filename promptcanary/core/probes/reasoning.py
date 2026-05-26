@@ -15,6 +15,7 @@ Probes:
 from __future__ import annotations
 
 import re
+from typing import Any
 
 from promptcanary.core.models import (
     CanaryPrompt,
@@ -44,9 +45,9 @@ class StepByStepProbe(BaseProbe):
     description = "Detects whether the model produces explicit chain-of-thought steps."
 
     # Patterns indicating step-by-step reasoning
-    _STEP_PATTERNS = [
+    _STEP_PATTERNS = [  # noqa: RUF012
         r"\bStep\s+\d+",
-        r"^\d+\.\s+\w",                   # "1. Do something"
+        r"^\d+\.\s+\w",  # "1. Do something"
         r"\bFirst(?:ly)?[,:]",
         r"\bSecond(?:ly)?[,:]",
         r"\bThird(?:ly)?[,:]",
@@ -55,7 +56,7 @@ class StepByStepProbe(BaseProbe):
         r"\bThen[,:]",
         r"\bLet(?:'s| us) (start|begin|think|consider)",
         r"\bTo (start|begin|solve)",
-        r"<thinking>",                     # Claude-style thinking tags
+        r"<thinking>",  # Claude-style thinking tags
         r"\blet me (think|work|break)",
     ]
 
@@ -66,8 +67,7 @@ class StepByStepProbe(BaseProbe):
     def evaluate(self, prompt: CanaryPrompt, response: LLMResponse) -> ProbeResult:
         content = response.content
         step_count = sum(
-            len(re.findall(p, content, re.IGNORECASE | re.MULTILINE))
-            for p in self._STEP_PATTERNS
+            len(re.findall(p, content, re.IGNORECASE | re.MULTILINE)) for p in self._STEP_PATTERNS
         )
         has_steps = step_count >= self.min_step_count
 
@@ -128,18 +128,22 @@ class VerbosityProbe(BaseProbe):
 
     def evaluate(self, prompt: CanaryPrompt, response: LLMResponse) -> ProbeResult:
         word_count = len(response.content.split())
-        meta = {"word_count": word_count}
+        meta: dict[str, Any] = {"word_count": word_count}
 
         # Hard bounds
         if word_count < self.min_words:
             return self._make_result(
-                prompt.id, passed=False, score=0.0,
+                prompt.id,
+                passed=False,
+                score=0.0,
                 details=f"Too few words: {word_count} (min: {self.min_words}).",
                 metadata=meta,
             )
         if self.max_words and word_count > self.max_words:
             return self._make_result(
-                prompt.id, passed=False, score=0.0,
+                prompt.id,
+                passed=False,
+                score=0.0,
                 details=f"Too many words: {word_count} (max: {self.max_words}).",
                 metadata=meta,
             )
@@ -163,7 +167,9 @@ class VerbosityProbe(BaseProbe):
             )
 
         return self._make_result(
-            prompt.id, passed=True, score=1.0,
+            prompt.id,
+            passed=True,
+            score=1.0,
             details=f"Word count: {word_count}.",
             metadata=meta,
         )
@@ -185,18 +191,36 @@ class ConfidenceLanguageProbe(BaseProbe):
     category = ProbeCategory.REASONING
     description = "Detects changes in how confidently or tentatively the model responds."
 
-    _HEDGE_WORDS = [
-        r"\bI think\b", r"\bI believe\b", r"\bI'm not sure\b",
-        r"\bperhaps\b", r"\bmaybe\b", r"\bmight\b", r"\bcould be\b",
-        r"\bpossibly\b", r"\bprobably\b", r"\blikely\b", r"\bseems?\b",
-        r"\bappears?\b", r"\bsuggest[s]?\b", r"\bit's possible\b",
-        r"\buncertain\b", r"\bunsure\b", r"\bnot entirely\b",
-        r"\btend[s]? to\b", r"\bgenerally\b",
+    _HEDGE_WORDS = [  # noqa: RUF012
+        r"\bI think\b",
+        r"\bI believe\b",
+        r"\bI'm not sure\b",
+        r"\bperhaps\b",
+        r"\bmaybe\b",
+        r"\bmight\b",
+        r"\bcould be\b",
+        r"\bpossibly\b",
+        r"\bprobably\b",
+        r"\blikely\b",
+        r"\bseems?\b",
+        r"\bappears?\b",
+        r"\bsuggest[s]?\b",
+        r"\bit's possible\b",
+        r"\buncertain\b",
+        r"\bunsure\b",
+        r"\bnot entirely\b",
+        r"\btend[s]? to\b",
+        r"\bgenerally\b",
     ]
-    _CONFIDENCE_WORDS = [
-        r"\bcertainly\b", r"\bdefinitely\b", r"\babsolutely\b",
-        r"\bwithout doubt\b", r"\bclearly\b", r"\bobviously\b",
-        r"\bis\b", r"\bare\b",  # weak signal but volume helps
+    _CONFIDENCE_WORDS = [  # noqa: RUF012
+        r"\bcertainly\b",
+        r"\bdefinitely\b",
+        r"\babsolutely\b",
+        r"\bwithout doubt\b",
+        r"\bclearly\b",
+        r"\bobviously\b",
+        r"\bis\b",
+        r"\bare\b",  # weak signal but volume helps
     ]
 
     def __init__(self, expect_hedging: bool = False, threshold: float = 0.03) -> None:
@@ -207,9 +231,7 @@ class ConfidenceLanguageProbe(BaseProbe):
         content = response.content
         word_count = max(len(content.split()), 1)
 
-        hedge_matches = sum(
-            len(re.findall(p, content, re.IGNORECASE)) for p in self._HEDGE_WORDS
-        )
+        hedge_matches = sum(len(re.findall(p, content, re.IGNORECASE)) for p in self._HEDGE_WORDS)
         hedge_rate = hedge_matches / word_count
 
         has_hedging = hedge_rate >= self.threshold
@@ -258,7 +280,7 @@ class DirectAnswerProbe(BaseProbe):
     category = ProbeCategory.REASONING
     description = "Detects unnecessary preamble before the actual answer."
 
-    _PREAMBLE_PATTERNS = [
+    _PREAMBLE_PATTERNS = [  # noqa: RUF012
         r"^Sure[!,]",
         r"^Of course[!,]",
         r"^Certainly[!,]",
@@ -278,23 +300,23 @@ class DirectAnswerProbe(BaseProbe):
         self.max_preamble_chars = max_preamble_chars
 
     def evaluate(self, prompt: CanaryPrompt, response: LLMResponse) -> ProbeResult:
-        opening = response.content[:self.max_preamble_chars].strip()
-        preamble_found = any(
-            re.search(p, opening, re.IGNORECASE) for p in self._PREAMBLE_PATTERNS
-        )
+        opening = response.content[: self.max_preamble_chars].strip()
+        preamble_found = any(re.search(p, opening, re.IGNORECASE) for p in self._PREAMBLE_PATTERNS)
 
         if self.expect_direct:
             passed = not preamble_found
             score = 0.0 if preamble_found else 1.0
             details = (
-                "Response starts directly without preamble." if not preamble_found
+                "Response starts directly without preamble."
+                if not preamble_found
                 else f"Preamble detected in first {self.max_preamble_chars} chars: {opening!r}"
             )
         else:
             passed = preamble_found
             score = 1.0 if preamble_found else 0.5
             details = (
-                "Preamble present as expected." if preamble_found
+                "Preamble present as expected."
+                if preamble_found
                 else "Expected preamble but response is direct."
             )
 

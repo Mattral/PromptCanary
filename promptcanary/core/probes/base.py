@@ -122,8 +122,7 @@ def get_probe(probe_id: str) -> type[BaseProbe]:
     except KeyError:
         available = ", ".join(sorted(_PROBE_REGISTRY))
         raise KeyError(
-            f"No probe registered with id={probe_id!r}. "
-            f"Available probes: {available}"
+            f"No probe registered with id={probe_id!r}. Available probes: {available}"
         ) from None
 
 
@@ -157,17 +156,15 @@ def probe(
             )
     """
 
-    def decorator(
-        fn: Callable[[CanaryPrompt, LLMResponse], ProbeResult]
-    ) -> type[BaseProbe]:
+    def decorator(fn: Callable[[CanaryPrompt, LLMResponse], ProbeResult]) -> type[BaseProbe]:
         _name = name or fn.__name__.replace("_", " ").title()
         _captured_fn = fn
 
         # Build the class dynamically with evaluate already defined so ABC is satisfied
-        def _evaluate(self: "BaseProbe", p: CanaryPrompt, r: LLMResponse) -> ProbeResult:
+        def _evaluate(self: BaseProbe, p: CanaryPrompt, r: LLMResponse) -> ProbeResult:
             return _captured_fn(p, r)
 
-        _FunctionalProbe = type(
+        _FunctionalProbe = type(  # noqa: N806  (dynamic class creation — uppercase is intentional)
             _name,
             (BaseProbe,),
             {
@@ -179,7 +176,7 @@ def probe(
             },
         )
 
-        _PROBE_REGISTRY[probe_id] = _FunctionalProbe  # type: ignore[assignment]
-        return _FunctionalProbe  # type: ignore[return-value]
+        _PROBE_REGISTRY[probe_id] = _FunctionalProbe
+        return _FunctionalProbe
 
     return decorator
