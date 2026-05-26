@@ -67,14 +67,19 @@ def snapshot_series() -> list[BaselineSnapshot]:
     base = datetime(2026, 6, 1, tzinfo=timezone.utc)
     return [
         _make_snapshot("trend-suite", {"json_validity": 1.0, "refusal": 1.0}, base),
-        _make_snapshot("trend-suite", {"json_validity": 0.9, "refusal": 1.0}, base + timedelta(days=1)),
-        _make_snapshot("trend-suite", {"json_validity": 0.5, "refusal": 0.8}, base + timedelta(days=2)),
+        _make_snapshot(
+            "trend-suite", {"json_validity": 0.9, "refusal": 1.0}, base + timedelta(days=1)
+        ),
+        _make_snapshot(
+            "trend-suite", {"json_validity": 0.5, "refusal": 0.8}, base + timedelta(days=2)
+        ),
     ]
 
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Sparkline helper
 # ─────────────────────────────────────────────────────────────────────────────
+
 
 class TestSparkline:
     def test_empty_list_returns_empty_string(self) -> None:
@@ -100,6 +105,7 @@ class TestSparkline:
 # plot_score_history
 # ─────────────────────────────────────────────────────────────────────────────
 
+
 class TestPlotScoreHistory:
     def test_raises_on_empty_list(self) -> None:
         with pytest.raises(ValueError, match="At least one snapshot"):
@@ -111,7 +117,9 @@ class TestPlotScoreHistory:
         assert "trend-suite" not in result or True  # title is custom, suite is in table
         assert "Score" in result or "score" in result.lower()
 
-    def test_ascii_mode_contains_all_snapshots(self, snapshot_series: list[BaselineSnapshot]) -> None:
+    def test_ascii_mode_contains_all_snapshots(
+        self, snapshot_series: list[BaselineSnapshot]
+    ) -> None:
         result = plot_score_history(snapshot_series, mode="ascii")
         # 3 snapshots → 3 data rows expected (plus headers)
         assert result.count("test/model") == 3
@@ -148,6 +156,7 @@ class TestPlotScoreHistory:
 # plot_probe_heatmap
 # ─────────────────────────────────────────────────────────────────────────────
 
+
 class TestPlotProbeHeatmap:
     def test_raises_on_empty_list(self) -> None:
         with pytest.raises(ValueError, match="At least one snapshot"):
@@ -179,6 +188,7 @@ class TestPlotProbeHeatmap:
 # ─────────────────────────────────────────────────────────────────────────────
 # plot_drift_timeline
 # ─────────────────────────────────────────────────────────────────────────────
+
 
 class TestPlotDriftTimeline:
     def test_raises_on_empty_list(self) -> None:
@@ -213,11 +223,18 @@ class TestPlotDriftTimeline:
 # Internal ASCII renderers (direct tests for branch coverage)
 # ─────────────────────────────────────────────────────────────────────────────
 
+
 class TestInternalAsciiRenderers:
     def test_ascii_score_history_direct(self) -> None:
         points = [
-            {"ts": datetime(2026, 6, 1, tzinfo=timezone.utc), "score": 1.0,
-             "pass_rate": 1.0, "model": "test/m", "suite": "s", "snap_id": "abc"},
+            {
+                "ts": datetime(2026, 6, 1, tzinfo=timezone.utc),
+                "score": 1.0,
+                "pass_rate": 1.0,
+                "model": "test/m",
+                "suite": "s",
+                "snap_id": "abc",
+            },
         ]
         result = _ascii_score_history(points, "Test Title")
         assert "Test Title" in result
@@ -241,8 +258,15 @@ class TestInternalAsciiRenderers:
 
     def test_ascii_drift_timeline_direct(self) -> None:
         points = [
-            {"ts": datetime(2026, 6, 1, tzinfo=timezone.utc), "regressions": 2,
-             "improvements": 0, "severity": "high", "severity_rank": 3, "score_delta": -0.3, "run_id": "abc"},
+            {
+                "ts": datetime(2026, 6, 1, tzinfo=timezone.utc),
+                "regressions": 2,
+                "improvements": 0,
+                "severity": "high",
+                "severity_rank": 3,
+                "score_delta": -0.3,
+                "run_id": "abc",
+            },
         ]
         result = _ascii_drift_timeline(points, "Drift Test")
         assert "Drift Test" in result

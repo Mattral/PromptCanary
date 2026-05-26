@@ -18,15 +18,12 @@ The module degrades gracefully — ASCII mode is always available.
 
 from __future__ import annotations
 
-import json
-import math
-from collections import defaultdict
 from datetime import datetime
 from pathlib import Path
-from typing import Any, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
-    from promptcanary.core.models import BaselineSnapshot, CanaryRunResult, DriftReport
+    from promptcanary.core.models import BaselineSnapshot, DriftReport
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -35,7 +32,7 @@ if TYPE_CHECKING:
 
 
 def plot_score_history(
-    snapshots: list["BaselineSnapshot"],
+    snapshots: list[BaselineSnapshot],
     *,
     title: str = "PromptCanary — Score History",
     output_path: str | Path | None = None,
@@ -85,13 +82,13 @@ def plot_score_history(
 
 
 def plot_probe_heatmap(
-    snapshots: list["BaselineSnapshot"],
+    snapshots: list[BaselineSnapshot],
     *,
     title: str = "PromptCanary — Probe Score Heatmap",
     output_path: str | Path | None = None,
     mode: str = "auto",
 ) -> str | None:
-    """Plot a probe × time heatmap showing score drift at probe granularity.
+    """Plot a probe x time heatmap showing score drift at probe granularity.
 
     Args:
         snapshots:    Ordered list of :class:`BaselineSnapshot` objects.
@@ -133,7 +130,7 @@ def plot_probe_heatmap(
 
 
 def plot_drift_timeline(
-    drift_reports: list["DriftReport"],
+    drift_reports: list[DriftReport],
     *,
     title: str = "PromptCanary — Drift Timeline",
     output_path: str | Path | None = None,
@@ -152,7 +149,7 @@ def plot_drift_timeline(
 
     from promptcanary.core.models import DriftSeverity
 
-    _SEVERITY_RANK = {
+    _SEVERITY_RANK = {  # noqa: N806  (module-level constant semantics inside function)
         DriftSeverity.NONE: 0,
         DriftSeverity.LOW: 1,
         DriftSeverity.MEDIUM: 2,
@@ -187,7 +184,7 @@ _SPARKLINE_CHARS = " ▁▂▃▄▅▆▇█"
 
 
 def _sparkline(values: list[float], width: int = 40) -> str:
-    """Render a list of 0–1 floats as a terminal sparkline."""
+    """Render a list of 0-1 floats as a terminal sparkline."""
     if not values:
         return ""
     normalised = [max(0.0, min(1.0, v)) for v in values]
@@ -209,9 +206,7 @@ def _ascii_score_history(points: list[dict[str, Any]], title: str) -> str:
     lines.append("─" * 70)
     for p in points:
         ts = p["ts"].strftime("%Y-%m-%d %H:%M") if isinstance(p["ts"], datetime) else str(p["ts"])
-        lines.append(
-            f"{ts:<22} {p['model'][:28]:<30} {p['score']:>7.1%} {p['pass_rate']:>5.1%}"
-        )
+        lines.append(f"{ts:<22} {p['model'][:28]:<30} {p['score']:>7.1%} {p['pass_rate']:>5.1%}")
     result = "\n".join(lines) + "\n"
     print(result)
     return result
@@ -258,9 +253,11 @@ def _ascii_drift_timeline(points: list[dict[str, Any]], title: str) -> str:
 # Plotly renderers (optional dep)
 # ─────────────────────────────────────────────────────────────────────────────
 
+
 def _plotly_available() -> bool:
     try:
         import plotly  # noqa: F401
+
         return True
     except ImportError:
         return False
@@ -301,7 +298,7 @@ def _plotly_score_history(
     title: str,
     output_path: str | Path | None,
 ) -> str:
-    import plotly.graph_objects as go  # type: ignore[import-untyped]
+    import plotly.graph_objects as go
 
     timestamps = [p["ts"] for p in points]
     scores = [round(p["score"] * 100, 1) for p in points]
@@ -312,31 +309,38 @@ def _plotly_score_history(
     ]
 
     fig = go.Figure()
-    fig.add_trace(go.Scatter(
-        x=timestamps, y=scores,
-        name="Overall Score (%)",
-        mode="lines+markers",
-        line=dict(color="#60a5fa", width=2),
-        marker=dict(size=8, color="#60a5fa"),
-        hovertext=hover, hoverinfo="text",
-    ))
-    fig.add_trace(go.Scatter(
-        x=timestamps, y=pass_rates,
-        name="Pass Rate (%)",
-        mode="lines+markers",
-        line=dict(color="#34d399", width=2, dash="dot"),
-        marker=dict(size=6, color="#34d399"),
-        hoverinfo="skip",
-    ))
+    fig.add_trace(
+        go.Scatter(
+            x=timestamps,
+            y=scores,
+            name="Overall Score (%)",
+            mode="lines+markers",
+            line={"color": "#60a5fa", "width": 2},
+            marker={"size": 8, "color": "#60a5fa"},
+            hovertext=hover,
+            hoverinfo="text",
+        )
+    )
+    fig.add_trace(
+        go.Scatter(
+            x=timestamps,
+            y=pass_rates,
+            name="Pass Rate (%)",
+            mode="lines+markers",
+            line={"color": "#34d399", "width": 2, "dash": "dot"},
+            marker={"size": 6, "color": "#34d399"},
+            hoverinfo="skip",
+        )
+    )
     fig.update_layout(
         template="plotly_dark",
         paper_bgcolor="#1e293b",
         plot_bgcolor="#0f172a",
-        font=dict(family="ui-monospace, monospace", color="#f1f5f9"),
-        yaxis=dict(range=[0, 105], title="Score (%)"),
-        xaxis=dict(title="Date"),
-        legend=dict(bgcolor="#1e293b"),
-        margin=dict(l=50, r=20, t=30, b=50),
+        font={"family": "ui-monospace, monospace", "color": "#f1f5f9"},
+        yaxis={"range": [0, 105], "title": "Score (%)"},
+        xaxis={"title": "Date"},
+        legend={"bgcolor": "#1e293b"},
+        margin={"l": 50, "r": 20, "t": 30, "b": 50},
     )
 
     return _emit(fig, title, output_path)
@@ -350,30 +354,38 @@ def _plotly_heatmap(
     title: str,
     output_path: str | Path | None,
 ) -> str:
-    import plotly.graph_objects as go  # type: ignore[import-untyped]
+    import plotly.graph_objects as go
 
     z = [[v if v is not None else -1 for v in matrix[pn]] for pn in probe_names]
     text = [[f"{v:.2f}" if v is not None else "N/A" for v in matrix[pn]] for pn in probe_names]
 
-    fig = go.Figure(go.Heatmap(
-        z=z, x=timestamps, y=probe_names,
-        text=text, texttemplate="%{text}",
-        colorscale=[
-            [0.0, "#ef4444"], [0.5, "#eab308"],
-            [0.8, "#22c55e"], [1.0, "#16a34a"],
-        ],
-        zmin=0, zmax=1,
-        colorbar=dict(title="Score", tickformat=".0%"),
-        hoverongaps=False,
-    ))
+    fig = go.Figure(
+        go.Heatmap(
+            z=z,
+            x=timestamps,
+            y=probe_names,
+            text=text,
+            texttemplate="%{text}",
+            colorscale=[
+                [0.0, "#ef4444"],
+                [0.5, "#eab308"],
+                [0.8, "#22c55e"],
+                [1.0, "#16a34a"],
+            ],
+            zmin=0,
+            zmax=1,
+            colorbar={"title": "Score", "tickformat": ".0%"},
+            hoverongaps=False,
+        )
+    )
     fig.update_layout(
         template="plotly_dark",
         paper_bgcolor="#1e293b",
         plot_bgcolor="#0f172a",
-        font=dict(family="ui-monospace, monospace", color="#f1f5f9"),
-        xaxis=dict(title="Date"),
-        yaxis=dict(title="Probe", autorange="reversed"),
-        margin=dict(l=200, r=20, t=30, b=80),
+        font={"family": "ui-monospace, monospace", "color": "#f1f5f9"},
+        xaxis={"title": "Date"},
+        yaxis={"title": "Probe", "autorange": "reversed"},
+        margin={"l": 200, "r": 20, "t": 30, "b": 80},
     )
 
     return _emit(fig, title, output_path)
@@ -385,11 +397,14 @@ def _plotly_drift_timeline(
     title: str,
     output_path: str | Path | None,
 ) -> str:
-    import plotly.graph_objects as go  # type: ignore[import-untyped]
+    import plotly.graph_objects as go
 
-    _SEVERITY_COLOURS = {
-        "none": "#22c55e", "low": "#eab308",
-        "medium": "#f97316", "high": "#ef4444", "critical": "#7f1d1d",
+    _SEVERITY_COLOURS = {  # noqa: N806  (constant semantics inside function)
+        "none": "#22c55e",
+        "low": "#eab308",
+        "medium": "#f97316",
+        "high": "#ef4444",
+        "critical": "#7f1d1d",
     }
 
     timestamps = [p["ts"] for p in points]
@@ -402,21 +417,25 @@ def _plotly_drift_timeline(
     ]
 
     fig = go.Figure()
-    fig.add_trace(go.Bar(
-        x=timestamps, y=regressions,
-        marker_color=colours,
-        hovertext=hover, hoverinfo="text",
-        name="Regressions",
-    ))
+    fig.add_trace(
+        go.Bar(
+            x=timestamps,
+            y=regressions,
+            marker_color=colours,
+            hovertext=hover,
+            hoverinfo="text",
+            name="Regressions",
+        )
+    )
     fig.add_hline(y=0, line_color="#475569", line_width=1)
     fig.update_layout(
         template="plotly_dark",
         paper_bgcolor="#1e293b",
         plot_bgcolor="#0f172a",
-        font=dict(family="ui-monospace, monospace", color="#f1f5f9"),
-        yaxis=dict(title="# Regressions", rangemode="tozero"),
-        xaxis=dict(title="Date"),
-        margin=dict(l=50, r=20, t=30, b=50),
+        font={"family": "ui-monospace, monospace", "color": "#f1f5f9"},
+        yaxis={"title": "# Regressions", "rangemode": "tozero"},
+        xaxis={"title": "Date"},
+        margin={"l": 50, "r": 20, "t": 30, "b": 50},
         showlegend=False,
     )
 
@@ -425,7 +444,7 @@ def _plotly_drift_timeline(
 
 def _emit(fig: Any, title: str, output_path: str | Path | None) -> str:
     """Render a Plotly figure to HTML and optionally save it."""
-    import plotly.io as pio  # type: ignore[import-untyped]
+    import plotly.io as pio
 
     div = pio.to_html(fig, full_html=False, include_plotlyjs=False)
     html = _HTML_WRAPPER.format(
@@ -438,7 +457,8 @@ def _emit(fig: Any, title: str, output_path: str | Path | None) -> str:
 
     # Notebook detection
     try:
-        from IPython.display import display, HTML  # type: ignore[import-untyped]
+        from IPython.display import HTML, display
+
         display(HTML(div))
         return html
     except ImportError:
