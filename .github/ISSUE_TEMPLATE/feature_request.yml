@@ -1,0 +1,60 @@
+name: Feature Request
+description: Suggest a new feature, probe, or provider for PromptCanary
+title: "[Feature]: "
+labels: ["enhancement", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for suggesting an improvement! The highest-value requests
+        are usually new probes, new providers, or storage backends — but
+        we're open to anything that improves the DX.
+
+  - type: dropdown
+    id: category
+    attributes:
+      label: Category
+      options:
+        - New probe
+        - New provider / storage backend
+        - CLI improvement
+        - SDK / API improvement
+        - Documentation
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem does this solve?
+      description: Describe the drift-detection gap or DX friction this addresses.
+      placeholder: "There's currently no way to detect drift in ... behavior."
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed solution
+      description: What would the API/CLI/probe look like?
+      placeholder: |
+        ```python
+        probe = MyNewProbe(param="value")
+        ```
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Any other approaches you've thought about?
+
+  - type: checkboxes
+    id: contribution
+    attributes:
+      label: Contribution
+      options:
+        - label: I'd be willing to submit a PR for this
+          required: false
