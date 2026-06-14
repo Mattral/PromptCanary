@@ -22,7 +22,7 @@ from promptcanary.core.models import (
 from promptcanary.core.reporter import DriftReporter, Reporter
 from promptcanary.core.suite import CanarySuite
 
-__all__ = [
+__all__ = [  # noqa: RUF022
     "compare",
     "CanarySuite",
     "Reporter",

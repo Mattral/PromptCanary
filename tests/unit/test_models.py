@@ -24,17 +24,16 @@ from promptcanary.core.models import (
     CanaryRunResult,
     DriftReport,
     DriftSeverity,
-    LLMResponse,
     ProbeCategory,
     ProbeComparison,
     ProbeResult,
     ProviderConfig,
 )
 
-
 # ─────────────────────────────────────────────────────────────────────────────
 # ProviderConfig
 # ─────────────────────────────────────────────────────────────────────────────
+
 
 class TestProviderConfig:
     def test_valid_creation(self) -> None:
@@ -68,7 +67,7 @@ class TestProviderConfig:
 
     def test_is_frozen(self) -> None:
         cfg = ProviderConfig(model_id="openai/gpt-4o")
-        with pytest.raises(Exception):
+        with pytest.raises(ValidationError):
             cfg.temperature = 0.5  # type: ignore[misc]
 
     def test_extra_params_default_empty(self) -> None:
@@ -79,6 +78,7 @@ class TestProviderConfig:
 # ─────────────────────────────────────────────────────────────────────────────
 # CanaryPrompt
 # ─────────────────────────────────────────────────────────────────────────────
+
 
 class TestCanaryPrompt:
     def test_valid_prompt(self) -> None:
@@ -101,7 +101,9 @@ class TestCanaryPrompt:
         assert p.system_prompt == "You are a helpful assistant."
 
     def test_expected_keywords(self) -> None:
-        p = CanaryPrompt(text="What is the capital of France?", expected_keywords=["Paris", "France"])
+        p = CanaryPrompt(
+            text="What is the capital of France?", expected_keywords=["Paris", "France"]
+        )
         assert "Paris" in p.expected_keywords
 
 
@@ -109,11 +111,12 @@ class TestCanaryPrompt:
 # CanaryRunResult — derived properties
 # ─────────────────────────────────────────────────────────────────────────────
 
+
 class TestCanaryRunResult:
     def _make_result(self, scores: list[float], passed_flags: list[bool]) -> CanaryRunResult:
         cfg = ProviderConfig(model_id="test/model")
         result = CanaryRunResult(suite_name="test-suite", provider=cfg)
-        for i, (score, passed) in enumerate(zip(scores, passed_flags)):
+        for i, (score, passed) in enumerate(zip(scores, passed_flags, strict=False)):
             result.probe_results.append(
                 ProbeResult(
                     probe_id=f"probe_{i}",
@@ -149,16 +152,24 @@ class TestCanaryRunResult:
         result = CanaryRunResult(suite_name="test", provider=cfg)
         result.probe_results.append(
             ProbeResult(
-                probe_id="p1", probe_name="P1",
-                category=ProbeCategory.FORMAT, prompt_id="x",
-                passed=True, score=1.0, details="",
+                probe_id="p1",
+                probe_name="P1",
+                category=ProbeCategory.FORMAT,
+                prompt_id="x",
+                passed=True,
+                score=1.0,
+                details="",
             )
         )
         result.probe_results.append(
             ProbeResult(
-                probe_id="p2", probe_name="P2",
-                category=ProbeCategory.REASONING, prompt_id="x",
-                passed=True, score=0.8, details="",
+                probe_id="p2",
+                probe_name="P2",
+                category=ProbeCategory.REASONING,
+                prompt_id="x",
+                passed=True,
+                score=0.8,
+                details="",
             )
         )
         by_cat = result.by_category
@@ -171,6 +182,7 @@ class TestCanaryRunResult:
 # ─────────────────────────────────────────────────────────────────────────────
 # DriftReport — severity + summary
 # ─────────────────────────────────────────────────────────────────────────────
+
 
 class TestDriftReport:
     def _make_comparison(
@@ -200,6 +212,7 @@ class TestDriftReport:
 
     def _make_report(self, comparisons: list[ProbeComparison]) -> DriftReport:
         from datetime import datetime, timezone
+
         cfg = ProviderConfig(model_id="test/model")
         return DriftReport(
             suite_name="test-suite",
@@ -231,12 +244,8 @@ class TestDriftReport:
         assert "⚠️" in report.summary
 
     def test_critical_severity_high_regression_rate(self) -> None:
-        comparisons = [
-            self._make_comparison(f"p{i}", 1.0, 0.0, True, False)
-            for i in range(5)
-        ] + [
-            self._make_comparison(f"q{i}", 1.0, 1.0, True, True)
-            for i in range(2)
+        comparisons = [self._make_comparison(f"p{i}", 1.0, 0.0, True, False) for i in range(5)] + [
+            self._make_comparison(f"q{i}", 1.0, 1.0, True, True) for i in range(2)
         ]
         report = self._make_report(comparisons)
         # 5 regressions out of 7 = ~71% regression rate → CRITICAL

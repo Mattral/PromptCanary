@@ -36,6 +36,7 @@ def make_response(content: str, prompt_id: str = "p1") -> LLMResponse:
 # StepByStepProbe
 # ─────────────────────────────────────────────────────────────────────────────
 
+
 class TestStepByStepProbe:
     def test_detects_numbered_steps(self) -> None:
         probe = StepByStepProbe(expect_steps=True, min_step_count=2)
@@ -79,6 +80,7 @@ class TestStepByStepProbe:
 # VerbosityProbe
 # ─────────────────────────────────────────────────────────────────────────────
 
+
 class TestVerbosityProbe:
     def test_within_tolerance(self) -> None:
         probe = VerbosityProbe(expected_words=100, tolerance=0.5)
@@ -113,6 +115,7 @@ class TestVerbosityProbe:
 # ConfidenceLanguageProbe
 # ─────────────────────────────────────────────────────────────────────────────
 
+
 class TestConfidenceLanguageProbe:
     def test_detects_hedging_when_expected(self) -> None:
         probe = ConfidenceLanguageProbe(expect_hedging=True, threshold=0.01)
@@ -136,6 +139,7 @@ class TestConfidenceLanguageProbe:
 # ─────────────────────────────────────────────────────────────────────────────
 # DirectAnswerProbe
 # ─────────────────────────────────────────────────────────────────────────────
+
 
 class TestDirectAnswerProbe:
     def test_passes_direct_response(self) -> None:
@@ -169,6 +173,7 @@ class TestDirectAnswerProbe:
 # RefusalProbe
 # ─────────────────────────────────────────────────────────────────────────────
 
+
 class TestRefusalProbe:
     def test_no_refusal_when_not_expected(self) -> None:
         probe = RefusalProbe(expect_refusal=False)
@@ -178,8 +183,7 @@ class TestRefusalProbe:
     def test_refusal_detected(self) -> None:
         probe = RefusalProbe(expect_refusal=False)
         r = probe.evaluate(
-            make_prompt(),
-            make_response("I'm sorry, I can't help with that request.")
+            make_prompt(), make_response("I'm sorry, I can't help with that request.")
         )
         assert not r.passed
 
@@ -187,7 +191,7 @@ class TestRefusalProbe:
         probe = RefusalProbe(expect_refusal=True)
         r = probe.evaluate(
             make_prompt(),
-            make_response("I cannot assist with this. It goes against my guidelines.")
+            make_response("I cannot assist with this. It goes against my guidelines."),
         )
         assert r.passed
 
@@ -210,6 +214,7 @@ class TestRefusalProbe:
 # SafetyLanguageProbe
 # ─────────────────────────────────────────────────────────────────────────────
 
+
 class TestSafetyLanguageProbe:
     def test_no_disclaimer_when_not_expected(self) -> None:
         probe = SafetyLanguageProbe(expect_safety_language=False)
@@ -220,7 +225,7 @@ class TestSafetyLanguageProbe:
         probe = SafetyLanguageProbe(expect_safety_language=False)
         r = probe.evaluate(
             make_prompt(),
-            make_response("Please consult a professional before acting on this advice.")
+            make_response("Please consult a professional before acting on this advice."),
         )
         assert not r.passed
 
@@ -228,7 +233,7 @@ class TestSafetyLanguageProbe:
         probe = SafetyLanguageProbe(expect_safety_language=True)
         r = probe.evaluate(
             make_prompt(),
-            make_response("This is for informational purposes only. Please consult a doctor.")
+            make_response("This is for informational purposes only. Please consult a doctor."),
         )
         assert r.passed
 
@@ -236,6 +241,7 @@ class TestSafetyLanguageProbe:
 # ─────────────────────────────────────────────────────────────────────────────
 # FactualConsistencyProbe
 # ─────────────────────────────────────────────────────────────────────────────
+
 
 class TestFactualConsistencyProbe:
     def test_contains_match(self) -> None:
@@ -283,6 +289,7 @@ class TestFactualConsistencyProbe:
 # ─────────────────────────────────────────────────────────────────────────────
 # SentimentProbe
 # ─────────────────────────────────────────────────────────────────────────────
+
 
 class TestSentimentProbe:
     def test_no_expectation_always_passes(self) -> None:

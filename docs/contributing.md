@@ -4,7 +4,7 @@ title: Contributing
 
 <!--
   This page mirrors the repository root CONTRIBUTING.md.
-  Source of truth: /CONTRIBUTING.md — edit there, not here.
+  Source of truth: /CONTRIBUTING.md -- edit there, not here.
   Regenerate with: python docs/sync_root_docs.py
 -->
 
@@ -18,7 +18,8 @@ a documentation improvement, or a community canary suite.
 
 ## Code of Conduct
 
-This project follows the [Contributor Covenant v2.1](https://www.contributor-covenant.org/version/2/1/code_of_conduct/).
+This project follows the [Contributor Covenant v2.1](https://www.contributor-covenant.org/version/2/1/code_of_conduct/),
+reproduced in full in [`CODE_OF_CONDUCT.md`](code-of-conduct.md).
 By participating you agree to uphold these standards. Reports of unacceptable
 behaviour can be sent to conduct@promptcanary.dev (placeholder).
 

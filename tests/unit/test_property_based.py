@@ -25,7 +25,6 @@ import string
 import tempfile
 from pathlib import Path
 
-import pytest
 from hypothesis import HealthCheck, given, settings
 from hypothesis import strategies as st
 
@@ -37,13 +36,11 @@ from promptcanary.core.models import (
     DriftSeverity,
     LLMResponse,
     ProbeCategory,
-    ProbeComparison,
     ProbeResult,
     ProviderConfig,
 )
 from promptcanary.core.probes.format import JsonValidityProbe, ResponseLengthProbe
 from promptcanary.storage.file import FileBaselineStore
-
 
 # ─── Strategy helpers ─────────────────────────────────────────────────────────
 
@@ -90,6 +87,7 @@ def _make_snapshot(run: CanaryRunResult) -> BaselineSnapshot:
 # Invariant: ProbeResult score always in [0.0, 1.0]
 # ─────────────────────────────────────────────────────────────────────────────
 
+
 @given(score=_score_st)
 def test_probe_result_score_always_valid(score: float) -> None:
     """Any score in [0.0, 1.0] must be accepted without error."""
@@ -101,6 +99,7 @@ def test_probe_result_score_always_valid(score: float) -> None:
 def test_make_result_clamps_score(score: float) -> None:
     """BaseProbe._make_result clamps scores to [0.0, 1.0]."""
     from promptcanary.core.probes.format import JsonValidityProbe
+
     probe = JsonValidityProbe()
     clamped = probe._make_result("p1", passed=True, score=score)
     assert 0.0 <= clamped.score <= 1.0
@@ -110,14 +109,12 @@ def test_make_result_clamps_score(score: float) -> None:
 # Invariant: CanaryRunResult.overall_score is mean of all probe scores
 # ─────────────────────────────────────────────────────────────────────────────
 
+
 @given(scores=st.lists(_score_st, min_size=1, max_size=20))
 @settings(max_examples=200, suppress_health_check=[HealthCheck.too_slow])
 def test_overall_score_is_mean_of_probe_scores(scores: list[float]) -> None:
     """overall_score must equal the arithmetic mean of all probe scores."""
-    results = [
-        _make_probe_result(f"probe_{i}", "p1", s, s >= 0.5)
-        for i, s in enumerate(scores)
-    ]
+    results = [_make_probe_result(f"probe_{i}", "p1", s, s >= 0.5) for i, s in enumerate(scores)]
     run = _make_run(results)
     expected = sum(scores) / len(scores)
     assert abs(run.overall_score - expected) < 1e-9
@@ -145,6 +142,7 @@ def test_pass_rate_in_unit_interval(scores: list[float]) -> None:
 # Invariant: DriftReport.overall_score_delta == current - baseline
 # ─────────────────────────────────────────────────────────────────────────────
 
+
 @given(
     baseline_scores=st.lists(_score_st, min_size=1, max_size=10),
     current_scores=st.lists(_score_st, min_size=1, max_size=10),
@@ -156,12 +154,16 @@ def test_score_delta_equals_current_minus_baseline(
 ) -> None:
     """overall_score_delta must always equal current - baseline."""
     # Use same length by zipping
-    pairs = list(zip(baseline_scores, current_scores))
+    pairs = list(zip(baseline_scores, current_scores, strict=False))
     if not pairs:
         return
 
-    b_results = [_make_probe_result(f"probe_{i}", "p1", s, s >= 0.5) for i, (s, _) in enumerate(pairs)]
-    c_results = [_make_probe_result(f"probe_{i}", "p1", s, s >= 0.5) for i, (_, s) in enumerate(pairs)]
+    b_results = [
+        _make_probe_result(f"probe_{i}", "p1", s, s >= 0.5) for i, (s, _) in enumerate(pairs)
+    ]
+    c_results = [
+        _make_probe_result(f"probe_{i}", "p1", s, s >= 0.5) for i, (_, s) in enumerate(pairs)
+    ]
 
     baseline_run = _make_run(b_results)
     current_run = _make_run(c_results)
@@ -176,7 +178,12 @@ def test_score_delta_equals_current_minus_baseline(
 # Invariant: DriftReport.summary always contains the suite name
 # ─────────────────────────────────────────────────────────────────────────────
 
-@given(suite_name=st.text(alphabet=string.ascii_letters + string.digits + "-_", min_size=1, max_size=30))
+
+@given(
+    suite_name=st.text(
+        alphabet=string.ascii_letters + string.digits + "-_", min_size=1, max_size=30
+    )
+)
 @settings(max_examples=50)
 def test_drift_summary_contains_suite_name(suite_name: str) -> None:
     """DriftReport.summary must always mention the suite name."""
@@ -190,6 +197,7 @@ def test_drift_summary_contains_suite_name(suite_name: str) -> None:
 # ─────────────────────────────────────────────────────────────────────────────
 # Invariant: No-change comparison never produces regressions
 # ─────────────────────────────────────────────────────────────────────────────
+
 
 @given(scores=st.lists(_score_st, min_size=1, max_size=15))
 @settings(max_examples=150)
@@ -207,6 +215,7 @@ def test_identical_runs_produce_no_drift(scores: list[float]) -> None:
 # ─────────────────────────────────────────────────────────────────────────────
 # Invariant: ResponseLengthProbe score always in [0.0, 1.0]
 # ─────────────────────────────────────────────────────────────────────────────
+
 
 @given(
     content=st.text(min_size=0, max_size=10000),
@@ -241,6 +250,7 @@ def test_response_length_probe_score_always_valid(
 # Invariant: JsonValidityProbe score is always binary (0.0 or 1.0)
 # ─────────────────────────────────────────────────────────────────────────────
 
+
 @given(content=st.text(min_size=0, max_size=2000))
 @settings(max_examples=300, suppress_health_check=[HealthCheck.too_slow])
 def test_json_validity_probe_score_is_binary(content: str) -> None:
@@ -254,15 +264,17 @@ def test_json_validity_probe_score_is_binary(content: str) -> None:
     assert result.passed == (result.score == 1.0)
 
 
-@given(data=st.one_of(
-    st.dictionaries(st.text(min_size=1, max_size=10), st.integers()),
-    st.lists(st.integers(), min_size=0, max_size=5),
-    st.integers(),
-    st.floats(allow_nan=False, allow_infinity=False),
-    st.booleans(),
-    st.none(),
-    st.text(min_size=0, max_size=100),
-))
+@given(
+    data=st.one_of(
+        st.dictionaries(st.text(min_size=1, max_size=10), st.integers()),
+        st.lists(st.integers(), min_size=0, max_size=5),
+        st.integers(),
+        st.floats(allow_nan=False, allow_infinity=False),
+        st.booleans(),
+        st.none(),
+        st.text(min_size=0, max_size=100),
+    )
+)
 @settings(max_examples=100)
 def test_json_validity_probe_passes_on_valid_json(data: object) -> None:
     """JsonValidityProbe must pass on any valid JSON-serialisable value."""
@@ -278,6 +290,7 @@ def test_json_validity_probe_passes_on_valid_json(data: object) -> None:
 # ─────────────────────────────────────────────────────────────────────────────
 # Invariant: FileBaselineStore round-trips perfectly
 # ─────────────────────────────────────────────────────────────────────────────
+
 
 @given(
     suite_name=st.text(
@@ -301,7 +314,7 @@ def test_baseline_store_round_trip(suite_name: str, scores: list[float]) -> None
     assert loaded.suite_name == suite_name
     assert loaded.snapshot_id == snapshot.snapshot_id
     assert len(loaded.run_result.probe_results) == len(results)
-    for orig, restored in zip(results, loaded.run_result.probe_results):
+    for orig, restored in zip(results, loaded.run_result.probe_results, strict=False):
         assert abs(orig.score - restored.score) < 1e-9
         assert orig.passed == restored.passed
 
@@ -309,6 +322,7 @@ def test_baseline_store_round_trip(suite_name: str, scores: list[float]) -> None
 # ─────────────────────────────────────────────────────────────────────────────
 # Invariant: failed_probes count <= total probe count
 # ─────────────────────────────────────────────────────────────────────────────
+
 
 @given(scores=st.lists(_score_st, min_size=0, max_size=20))
 @settings(max_examples=100)
@@ -322,6 +336,7 @@ def test_failed_probe_count_leq_total(scores: list[float]) -> None:
 # ─────────────────────────────────────────────────────────────────────────────
 # Invariant: compare() is symmetric in regression/improvement detection
 # ─────────────────────────────────────────────────────────────────────────────
+
 
 @given(
     b_score=_score_st,

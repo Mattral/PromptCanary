@@ -28,7 +28,7 @@ Usage::
 from __future__ import annotations
 
 import json
-from datetime import datetime, timezone
+from datetime import datetime
 from pathlib import Path
 from typing import Any
 
@@ -116,7 +116,8 @@ class FileBaselineStore:
         if not matches:
             # Try full scan
             matches = [
-                f for f in self.directory.glob("*.json")
+                f
+                for f in self.directory.glob("*.json")
                 if snapshot_id in f.read_text(encoding="utf-8")
             ]
         if not matches:
@@ -172,15 +173,17 @@ class FileBaselineStore:
         for f in sorted(files, reverse=True):
             try:
                 data = json.loads(f.read_text(encoding="utf-8"))
-                results.append({
-                    "path": str(f),
-                    "snapshot_id": data.get("snapshot_id", "?"),
-                    "suite_name": data.get("suite_name", "?"),
-                    "model_id": data.get("provider", {}).get("model_id", "?"),
-                    "created_at": data.get("created_at", "?"),
-                    "note": data.get("_note", ""),
-                })
-            except Exception:  # noqa: BLE001
+                results.append(
+                    {
+                        "path": str(f),
+                        "snapshot_id": data.get("snapshot_id", "?"),
+                        "suite_name": data.get("suite_name", "?"),
+                        "model_id": data.get("provider", {}).get("model_id", "?"),
+                        "created_at": data.get("created_at", "?"),
+                        "note": data.get("_note", ""),
+                    }
+                )
+            except Exception:
                 continue
         return results
 
@@ -196,9 +199,7 @@ class FileBaselineStore:
     # ── Internal helpers ─────────────────────────────────────────────────────
 
     @staticmethod
-    def _filename(
-        suite_name: str, model_id: str, ts: datetime, snap_id: str
-    ) -> str:
+    def _filename(suite_name: str, model_id: str, ts: datetime, snap_id: str) -> str:
         """Build a deterministic, shell-safe filename."""
         suite_slug = suite_name.replace("/", "-").replace(" ", "_")[:40]
         model_slug = model_id.replace("/", "-").replace(":", "-")[:40]

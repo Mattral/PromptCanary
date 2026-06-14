@@ -38,10 +38,6 @@ from promptcanary.core.models import (
 )
 from promptcanary.core.probes import (
     BaseProbe,
-    ToolCallArgsProbe,
-    ToolCallNameProbe,
-    ToolCallPresenceProbe,
-    ToolCallSchemaProbe,
     ConfidenceLanguageProbe,
     DirectAnswerProbe,
     ExpectedKeywordsProbe,
@@ -56,6 +52,10 @@ from promptcanary.core.probes import (
     SafetyLanguageProbe,
     SentimentProbe,
     StepByStepProbe,
+    ToolCallArgsProbe,
+    ToolCallNameProbe,
+    ToolCallPresenceProbe,
+    ToolCallSchemaProbe,
     VerbosityProbe,
     get_probe,
     get_probe_registry,
@@ -66,10 +66,10 @@ from promptcanary.core.suite import CanarySuite
 from promptcanary.providers.litellm import LiteLLMProvider
 from promptcanary.storage.file import FileBaselineStore
 
-__version__ = "0.2.0"
+__version__ = "0.2.1"
 __author__ = "PromptCanary Contributors"
 
-__all__ = [
+__all__ = [  # noqa: RUF022
     # Version
     "__version__",
     # High-level API
@@ -91,11 +91,12 @@ __all__ = [
     "ProbeResult",
     "ProviderConfig",
     "ReportFormat",
-    # Probes
+    # Probes — base
     "BaseProbe",
     "probe",
     "get_probe",
     "get_probe_registry",
+    # Probes — format
     "JsonValidityProbe",
     "JsonSchemaProbe",
     "JsonKeyOrderProbe",
@@ -103,12 +104,20 @@ __all__ = [
     "MarkdownHeaderProbe",
     "KeywordPresenceProbe",
     "ExpectedKeywordsProbe",
+    # Probes — reasoning
     "StepByStepProbe",
     "VerbosityProbe",
     "ConfidenceLanguageProbe",
     "DirectAnswerProbe",
+    # Probes — safety
     "RefusalProbe",
     "SafetyLanguageProbe",
+    # Probes — factual
     "FactualConsistencyProbe",
     "SentimentProbe",
+    # Probes — tool use
+    "ToolCallPresenceProbe",
+    "ToolCallNameProbe",
+    "ToolCallArgsProbe",
+    "ToolCallSchemaProbe",
 ]

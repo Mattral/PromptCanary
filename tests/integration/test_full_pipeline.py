@@ -13,16 +13,12 @@ from __future__ import annotations
 
 from pathlib import Path
 
-import pytest
-
 from promptcanary import (
     CanarySuite,
     FileBaselineStore,
     JsonValidityProbe,
     KeywordPresenceProbe,
-    LiteLLMProvider,
     RefusalProbe,
-    StepByStepProbe,
     compare,
 )
 from promptcanary.core.models import CanaryPrompt, DriftSeverity
@@ -37,7 +33,9 @@ class TestFullRunBaslineCompareWorkflow:
         suite = CanarySuite(
             name="e2e-suite",
             prompts=[
-                CanaryPrompt(id="geo001", text="What is the capital of France?", expected_keywords=["Paris"]),
+                CanaryPrompt(
+                    id="geo001", text="What is the capital of France?", expected_keywords=["Paris"]
+                ),
                 CanaryPrompt(id="json001", text='Return JSON with key "name".'),
             ],
             probes=[
@@ -88,7 +86,7 @@ class TestFullRunBaslineCompareWorkflow:
 
     def test_reporter_generates_all_formats(self, tmp_path: Path) -> None:
         """Verify all report formats are generated without errors."""
-        from promptcanary.core.reporter import Reporter, DriftReporter
+        from promptcanary.core.reporter import Reporter
 
         suite = CanarySuite(
             name="e2e-suite",
@@ -166,8 +164,8 @@ prompts:
 
     def test_custom_probe_decorator(self) -> None:
         """@probe decorator creates a working, registered probe."""
-        from promptcanary.core.probes.base import probe, get_probe_registry
         from promptcanary.core.models import CanaryPrompt, LLMResponse, ProbeCategory, ProbeResult
+        from promptcanary.core.probes.base import get_probe_registry, probe
 
         @probe("test_greeting", name="Test Greeting", category=ProbeCategory.CUSTOM)
         def check_greeting(prompt: CanaryPrompt, response: LLMResponse) -> ProbeResult:
@@ -207,9 +205,9 @@ prompts:
         provider = MockLLMProvider()
         store = FileBaselineStore(tmp_path / "baselines")
 
-        snap1 = store.save(suite.run(provider, show_progress=False), snapshot_id="aaa00001")
+        store.save(suite.run(provider, show_progress=False), snapshot_id="aaa00001")
         time.sleep(0.01)  # ensure different timestamp
-        snap2 = store.save(suite.run(provider, show_progress=False), snapshot_id="bbb00002")
+        store.save(suite.run(provider, show_progress=False), snapshot_id="bbb00002")
 
         items = store.list_baselines()
         assert len(items) == 2

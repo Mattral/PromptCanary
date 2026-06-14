@@ -14,11 +14,7 @@ realistic, deterministic response data that exercises the full pipeline.
 
 from __future__ import annotations
 
-import json
-import tempfile
-from datetime import datetime, timezone
 from pathlib import Path
-from unittest.mock import MagicMock
 
 import pytest
 
@@ -26,14 +22,11 @@ from promptcanary.core.models import (
     CanaryPrompt,
     CanaryRunResult,
     LLMResponse,
-    ProbeCategory,
-    ProbeResult,
     ProviderConfig,
 )
 from promptcanary.core.probes import JsonValidityProbe, KeywordPresenceProbe, StepByStepProbe
 from promptcanary.core.suite import CanarySuite
 from promptcanary.providers.base import BaseLLMProvider
-
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Canonical test data
@@ -89,7 +82,7 @@ RESPONSE_STEPS = LLMResponse(
         "Step 1: Fill a pot with water.\n"
         "Step 2: Place the pot on the stove.\n"
         "Step 3: Turn the burner to high heat.\n"
-        "Step 4: Wait until large bubbles form — this means the water is boiling."
+        "Step 4: Wait until large bubbles form - this means the water is boiling."
     ),
     finish_reason="stop",
     latency_ms=200.0,
@@ -100,8 +93,9 @@ RESPONSE_STEPS = LLMResponse(
 # Mock provider
 # ─────────────────────────────────────────────────────────────────────────────
 
+
 class MockLLMProvider(BaseLLMProvider):
-    """Deterministic mock provider for tests — no network calls."""
+    """Deterministic mock provider for tests - no network calls."""
 
     def __init__(self, responses: dict[str, str] | None = None) -> None:
         super().__init__(PROVIDER_CFG)
@@ -138,6 +132,7 @@ class MockLLMProvider(BaseLLMProvider):
 # Fixtures
 # ─────────────────────────────────────────────────────────────────────────────
 
+
 @pytest.fixture
 def mock_provider() -> MockLLMProvider:
     """A fresh mock provider for each test."""
@@ -147,11 +142,13 @@ def mock_provider() -> MockLLMProvider:
 @pytest.fixture
 def failing_json_provider() -> MockLLMProvider:
     """Mock provider that returns invalid JSON for json001."""
-    return MockLLMProvider(responses={
-        "geo001": RESPONSE_GEO.content,
-        "json001": RESPONSE_JSON_INVALID.content,
-        "step001": RESPONSE_STEPS.content,
-    })
+    return MockLLMProvider(
+        responses={
+            "geo001": RESPONSE_GEO.content,
+            "json001": RESPONSE_JSON_INVALID.content,
+            "step001": RESPONSE_STEPS.content,
+        }
+    )
 
 
 @pytest.fixture
@@ -185,7 +182,9 @@ def clean_run_result(basic_suite: CanarySuite, mock_provider: MockLLMProvider) -
 
 
 @pytest.fixture
-def failing_run_result(full_suite: CanarySuite, failing_json_provider: MockLLMProvider) -> CanaryRunResult:
+def failing_run_result(
+    full_suite: CanarySuite, failing_json_provider: MockLLMProvider
+) -> CanaryRunResult:
     """A CanaryRunResult with at least one failing probe."""
     return full_suite.run(failing_json_provider, show_progress=False)
 

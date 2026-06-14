@@ -32,8 +32,16 @@ DOCS_DIR = REPO_ROOT / "docs"
 _MIRRORS = [
     ("DECISION_LOG.md", "decision-log.md", "Decision Log"),
     ("CONTRIBUTING.md", "contributing.md", "Contributing"),
+    ("CODE_OF_CONDUCT.md", "code-of-conduct.md", "Code of Conduct"),
     ("CHANGELOG.md", "changelog.md", "Changelog"),
 ]
+
+# Root-level filenames that these mirrored docs cross-reference, mapped to
+# their docs-site page name. Applied to every mirrored file's content so a
+# link like "See CODE_OF_CONDUCT.md" resolves correctly both on GitHub
+# (root-relative) and won't break mkdocs --strict (docs-relative) -- we
+# rewrite only within the mirrored copy, never the root source file.
+_CROSS_REFERENCES = {source: dest for source, dest, _ in _MIRRORS}
 
 
 def _header(source_name: str, title: str) -> str:
@@ -41,7 +49,7 @@ def _header(source_name: str, title: str) -> str:
         f"---\ntitle: {title}\n---\n\n"
         f"<!--\n"
         f"  This page mirrors the repository root {source_name}.\n"
-        f"  Source of truth: /{source_name} — edit there, not here.\n"
+        f"  Source of truth: /{source_name} -- edit there, not here.\n"
         f"  Regenerate with: python docs/sync_root_docs.py\n"
         f"-->\n\n"
     )
@@ -53,12 +61,22 @@ def main() -> None:
         dest_path = DOCS_DIR / dest_file
 
         if not source_path.exists():
-            print(f"⚠️  Skipping {dest_file}: source {source_file} not found.")
+            print(f"Skipping {dest_file}: source {source_file} not found.")
             continue
 
         content = source_path.read_text(encoding="utf-8")
+
+        # Rewrite links to other mirrored root docs (e.g. "CODE_OF_CONDUCT.md")
+        # so they resolve to the docs-site page name (e.g. "code-of-conduct.md").
+        # Only applied to the mirrored copy -- the root source file is untouched
+        # and keeps its correct root-relative links for GitHub rendering.
+        for ref_source, ref_dest in _CROSS_REFERENCES.items():
+            if ref_source == source_file:
+                continue  # don't rewrite self-references
+            content = content.replace(f"]({ref_source})", f"]({ref_dest})")
+
         dest_path.write_text(_header(source_file, title) + content, encoding="utf-8")
-        print(f"✅ Synced {source_file} → docs/{dest_file}")
+        print(f"Synced {source_file} -> docs/{dest_file}")
 
 
 if __name__ == "__main__":
