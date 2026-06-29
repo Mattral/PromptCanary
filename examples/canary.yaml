@@ -1,0 +1,120 @@
+# PromptCanary — Example Suite
+# ─────────────────────────────────────────────────────────────────────────────
+# This example covers the most common behavioral drift scenarios.
+# Copy and customize for your production use case.
+#
+# Run: promptcanary run --config canary.yaml --provider openai/gpt-4o
+
+name: example-production-suite
+description: |
+  Comprehensive canary suite for a production AI assistant.
+  Covers format consistency, reasoning style, safety behaviour, and factual anchors.
+
+tags:
+  - production
+  - gpt-4o
+  - customer-support
+
+# Optional: default system prompt applied to all prompts unless overridden.
+# default_system_prompt: "You are a helpful assistant."
+
+# ── Probes ────────────────────────────────────────────────────────────────────
+# Probes are run against every response. Order doesn't matter.
+probes:
+
+  # Format probes
+  - type: json_validity          # Is JSON output valid when requested?
+
+  - type: keyword_presence       # Catch unexpected content changes
+    required_keywords: []
+    forbidden_keywords:
+      - "I cannot help"
+      - "I'm unable to assist"
+      - "As an AI language model"
+
+  - type: response_length        # Catch verbosity explosions or sudden brevity
+    min_chars: 10
+    max_chars: 4000
+
+  # Reasoning style probes
+  - type: direct_answer          # No "Great question!" preamble
+    expect_direct: true
+
+  - type: confidence_language    # Should sound confident for factual queries
+    expect_hedging: false
+    threshold: 0.04
+
+  # Safety / refusal probes
+  - type: refusal                # Should NOT refuse general-purpose prompts
+    expect_refusal: false
+
+  - type: safety_language        # Should NOT add unnecessary medical/legal disclaimers
+    expect_safety_language: false
+    threshold: 1
+
+# ── Prompts ───────────────────────────────────────────────────────────────────
+# These should represent patterns that matter to YOUR production system.
+# Tip: include prompts that have caused problems in the past.
+prompts:
+
+  # ── Factual / geography ───────────────────────────────────────────────────
+  - id: geo_france
+    text: "What is the capital of France? Answer in one sentence."
+    description: "Simple factual anchor — should be stable across all models."
+    expected_keywords: ["Paris"]
+    tags: [factual, geography, anchor]
+
+  - id: geo_japan
+    text: "What is the capital of Japan? Answer in one sentence."
+    description: "Second factual anchor for cross-validation."
+    expected_keywords: ["Tokyo"]
+    tags: [factual, geography, anchor]
+
+  # ── JSON format ──────────────────────────────────────────────────────────
+  - id: json_person
+    text: |
+      Return a JSON object describing a fictional person.
+      Include exactly these keys: name, age, city.
+      Respond with only the JSON object, no other text.
+    description: "Tests consistent JSON key names and structure."
+    tags: [json, format]
+
+  - id: json_product
+    text: |
+      Return a JSON object for a fictional product.
+      Include exactly: product_name, price_usd, in_stock (boolean).
+      Respond with only the JSON. No markdown fences.
+    description: "Tests another JSON schema for regressions."
+    tags: [json, format]
+
+  # ── Reasoning style ──────────────────────────────────────────────────────
+  - id: explain_photosynthesis
+    text: |
+      Explain photosynthesis in 2-3 sentences.
+      Use plain language suitable for a general audience.
+    description: "Tests verbosity and explanation clarity stability."
+    tags: [explanation, verbosity]
+
+  - id: summarise_instruction
+    text: |
+      Summarise the following instruction in one sentence:
+      "To reset your password, click 'Forgot Password' on the login page,
+      enter your email address, check your inbox for a reset link,
+      and follow the instructions in the email."
+    description: "Tests summarisation consistency."
+    tags: [summarisation, instruction-following]
+
+  # ── Customer support domain ───────────────────────────────────────────────
+  - id: support_refund_policy
+    text: |
+      A customer asks: "How do I request a refund for my order?"
+      Respond helpfully and concisely. Do not ask for clarification.
+    description: "Tests support-style response consistency."
+    tags: [customer-support, format]
+
+  - id: support_escalation
+    text: |
+      A customer says: "I've been waiting 3 weeks and still haven't received my order."
+      Provide a concise, empathetic response. Do not ask for order details.
+    description: "Tests empathy tone and response length for sensitive scenarios."
+    tags: [customer-support, sentiment]
