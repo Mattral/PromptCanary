@@ -93,22 +93,30 @@ prompts:
 
 ```bash
 export OPENAI_API_KEY=sk-...
-promptcanary run --provider openai/gpt-4o --save-baseline
+promptcanary run --provider openai/gpt-5.4 --save-baseline
 ```
 
 ```
 ┌─ PromptCanary Run Report ────────────────────────────────────────────────────┐
-│ my-production-suite  ·  Score: 100.0%  ·  Pass rate: 100.0%  ·  openai/gpt-4o
+│ my-production-suite  ·  Score: 100.0%  ·  Pass rate: 100.0%  ·  openai/gpt-5.4
 └──────────────────────────────────────────────────────────────────────────────┘
 ✅ All probes passed.
-✅ Baseline saved: baselines/my-suite__openai-gpt-4o__20260629T090000_abc12345.json
+✅ Baseline saved: baselines/my-suite__openai-gpt-5.4__20260629T090000_abc12345.json
 ```
 
 ### 3. Detect drift
 
 ```bash
 # Run whenever you want to check — daily, weekly, or in CI:
-promptcanary compare --provider openai/gpt-4o --fail-on-drift
+promptcanary compare --provider openai/gpt-5.4 --fail-on-drift
+```
+
+### Prefer a free, local model? Use Ollama instead — no API key needed:
+
+```bash
+ollama pull qwen3.6:27b
+promptcanary run --provider ollama/qwen3.6:27b --save-baseline
+promptcanary compare --provider ollama/qwen3.6:27b --fail-on-drift
 ```
 
 ---
@@ -143,7 +151,7 @@ suite = CanarySuite(
     ],
 )
 
-provider = LiteLLMProvider("openai/gpt-4o", temperature=0.0)
+provider = LiteLLMProvider("openai/gpt-5.4", temperature=0.0)
 
 # ── Run ───────────────────────────────────────────────────────────────────────
 result = suite.run(provider)
@@ -163,13 +171,28 @@ if drift.has_drift:
     # ⚠️ HIGH drift in 'production-agent': 2 regression(s) detected ...
 ```
 
+### Using Google Gemini instead
+
+```python
+provider = LiteLLMProvider("gemini/gemini-3.5-flash", temperature=0.0)
+result = suite.run(provider)
+```
+
+### Using a free, local model via Ollama (no API key, zero cost)
+
+```python
+# 1. Install Ollama and pull a model: `ollama pull qwen3.6:27b`
+provider = LiteLLMProvider("ollama/qwen3.6:27b", temperature=0.0)
+result = suite.run(provider)
+```
+
 ### Load from YAML
 
 ```python
 from promptcanary import CanarySuite, LiteLLMProvider
 
 suite = CanarySuite.from_yaml("canary.yaml")
-provider = LiteLLMProvider("anthropic/claude-3-5-sonnet-20241022")
+provider = LiteLLMProvider("anthropic/claude-sonnet-4-6")
 result = suite.run(provider)
 ```
 
@@ -204,6 +227,15 @@ result = suite.run(provider)
 |-------|---------|
 | `RefusalProbe(expect_refusal=False)` | Unexpected refusals (or missing ones) |
 | `SafetyLanguageProbe(expect_safety_language=False)` | New disclaimer injection |
+
+### Tool Use (Agent Workflows)
+
+| Probe | Detects |
+|-------|---------|
+| `ToolCallPresenceProbe(expect_tool_call=True)` | Missing or unexpected function calls |
+| `ToolCallNameProbe("search_web", allow_aliases=[...])` | Wrong function called |
+| `ToolCallArgsProbe(required_args=[...], forbidden_args=[...])` | Missing/leaked arguments |
+| `ToolCallSchemaProbe(schema={...})` | Full structural validation (name + args + types) |
 
 ### Factual
 
@@ -260,7 +292,7 @@ jobs:
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: |
-          promptcanary run --provider openai/gpt-4o --output-json results.json
+          promptcanary run --provider openai/gpt-5.4 --output-json results.json
           promptcanary compare --current results.json --baseline baselines/latest.json --fail-on-drift
 ```
 
@@ -273,19 +305,41 @@ On drift, PromptCanary will:
 
 ## Supported Providers
 
-Any provider supported by [LiteLLM](https://docs.litellm.ai/docs/providers):
+PromptCanary works with any provider supported by [LiteLLM](https://docs.litellm.ai/docs/providers) — cloud or local, paid or free.
+
+| Provider | Example model string | API key env var | Cost |
+|----------|----------------------|------------------|------|
+| OpenAI | `openai/gpt-5.5` (flagship), `openai/gpt-5.4` (balanced), `openai/gpt-5.4-mini` (fast) | `OPENAI_API_KEY` | Paid |
+| Anthropic | `anthropic/claude-opus-4-8` (flagship), `anthropic/claude-sonnet-4-6` (balanced) | `ANTHROPIC_API_KEY` | Paid |
+| Google Gemini | `gemini/gemini-3.1-pro` (flagship), `gemini/gemini-3.5-flash` (balanced), `gemini/gemini-3.1-flash-lite` (fast) | `GEMINI_API_KEY` | Paid |
+| xAI | `xai/grok-4` | `XAI_API_KEY` | Paid |
+| **Ollama (local, free)** | `ollama/qwen3.6:27b`, `ollama/deepseek-r1:14b`, `ollama/gpt-oss:20b`, `ollama/llama3.3:8b` | *(none)* | **Free** |
+| vLLM (self-hosted) | `hosted_vllm/<org>/<model>` | *(none)* | Free (self-hosted compute) |
+
+> Model availability changes quickly. Run `litellm --test` or check [LiteLLM's provider docs](https://docs.litellm.ai/docs/providers) for the latest model strings before relying on any example here.
 
 ```python
 # Cloud providers
-LiteLLMProvider("openai/gpt-4o")
-LiteLLMProvider("anthropic/claude-3-5-sonnet-20241022")
-LiteLLMProvider("gemini/gemini-1.5-pro")
-LiteLLMProvider("xai/grok-beta")
+LiteLLMProvider("openai/gpt-5.4")
+LiteLLMProvider("anthropic/claude-sonnet-4-6")
+LiteLLMProvider("gemini/gemini-3.5-flash")
+LiteLLMProvider("xai/grok-4")
 
-# Local models
-LiteLLMProvider("ollama/llama3")
-LiteLLMProvider("hosted_vllm/meta-llama/Llama-3-8b-Instruct")
+# Local models — zero cost, full privacy, no API key required
+LiteLLMProvider("ollama/qwen3.6:27b")        # strong general-purpose, Apache 2.0
+LiteLLMProvider("ollama/deepseek-r1:14b")    # reasoning-focused, MIT licensed
+LiteLLMProvider("ollama/gpt-oss:20b")        # OpenAI's open-weight release
+LiteLLMProvider("hosted_vllm/meta-llama/Llama-3.3-8B-Instruct")
 ```
+
+### Why test local models too?
+
+Local, open-weight models (via Ollama or vLLM) make excellent **zero-cost canaries**:
+running them hourly costs nothing and catches infrastructure-level regressions
+(prompt template bugs, parser issues) independent of any vendor's API changes.
+See [`notebooks/ci_integration.ipynb`](notebooks/ci_integration.ipynb) for a
+cost-aware multi-provider scheduling strategy that mixes free local models with
+periodic paid-provider checks.
 
 ---
 
@@ -294,7 +348,7 @@ LiteLLMProvider("hosted_vllm/meta-llama/Llama-3-8b-Instruct")
 Every run produces multiple output formats:
 
 ```bash
-promptcanary run --provider openai/gpt-4o \
+promptcanary run --provider openai/gpt-5.4 \
   --output-json results.json \
   --output-md report.md \
   --output-html report.html
@@ -307,6 +361,28 @@ promptcanary run --provider openai/gpt-4o \
 
 ---
 
+### Trend Visualization
+
+Track score history, per-probe heatmaps, and drift timelines across multiple runs:
+
+```python
+from promptcanary.storage.file import FileBaselineStore
+from promptcanary.utils.visualization import plot_score_history, plot_probe_heatmap
+
+store = FileBaselineStore("baselines/")
+snapshots = [store.load_from_path(p) for p in sorted(Path("baselines").glob("*.json"))]
+
+# Works everywhere — zero dependencies, ASCII sparkline in any terminal
+plot_score_history(snapshots, mode="ascii")
+
+# Interactive HTML — requires: pip install promptcanary[viz]
+plot_score_history(snapshots, output_path="trend.html")
+plot_probe_heatmap(snapshots, output_path="heatmap.html")
+```
+
+See [`notebooks/analyzing_drift_trends.ipynb`](notebooks/analyzing_drift_trends.ipynb)
+for a full walkthrough of identifying which probe regresses first during gradual drift.
+
 ## Architecture
 
 ```
@@ -316,12 +392,14 @@ promptcanary/
 │   ├── suite.py        # CanarySuite orchestrator
 │   ├── comparator.py   # Drift comparison engine
 │   ├── reporter.py     # Terminal/MD/HTML/JSON output
-│   └── probes/         # 15 built-in probes + registry
+│   └── probes/         # 19 built-in probes + registry
 ├── providers/
 │   ├── base.py         # BaseLLMProvider ABC
 │   └── litellm.py      # LiteLLM adapter
 ├── storage/
 │   └── file.py         # Local JSON baseline storage
+├── utils/
+│   └── visualization.py # Trend charts (ASCII + optional Plotly)
 └── cli.py              # Typer CLI
 ```
 
@@ -348,11 +426,16 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for setup, conventions, and the PR checkl
 
 ## Roadmap
 
+**Done in v0.1.x:**
+- [x] `ToolCallProbe` family — function name + argument schema stability for agent workflows
+- [x] Trend visualization — score history, probe heatmaps, drift timelines (ASCII + Plotly)
+- [x] Property-based tests (Hypothesis) for comparator and scoring invariants
+- [x] Full CLI test coverage
+
+**Planned:**
 - [ ] `suite.arun()` — async parallel execution
-- [ ] Trend visualization — score history charts
 - [ ] Export connectors — Langfuse, Phoenix/Arize
 - [ ] `SemanticSimilarityProbe` — embedding-based semantic drift
-- [ ] `ToolCallProbe` — function name + argument schema stability
 - [ ] S3 / GCS baseline storage backends
 - [ ] Optional web dashboard
 
