@@ -15,7 +15,7 @@ Quick start::
         prompts=[CanaryPrompt(text="Return JSON: {name: 'Alice'}")],
         probes=[JsonValidityProbe(), StepByStepProbe(expect_steps=False)],
     )
-    provider = LiteLLMProvider("openai/gpt-4o-mini")
+    provider = LiteLLMProvider("openai/gpt-5.4-mini")
     result = suite.run(provider)
     print(result.overall_score)
 
@@ -38,6 +38,10 @@ from promptcanary.core.models import (
 )
 from promptcanary.core.probes import (
     BaseProbe,
+    ToolCallArgsProbe,
+    ToolCallNameProbe,
+    ToolCallPresenceProbe,
+    ToolCallSchemaProbe,
     ConfidenceLanguageProbe,
     DirectAnswerProbe,
     ExpectedKeywordsProbe,
@@ -62,7 +66,7 @@ from promptcanary.core.suite import CanarySuite
 from promptcanary.providers.litellm import LiteLLMProvider
 from promptcanary.storage.file import FileBaselineStore
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"
 __author__ = "PromptCanary Contributors"
 
 __all__ = [

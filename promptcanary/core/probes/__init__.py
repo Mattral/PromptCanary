@@ -11,6 +11,12 @@ Import individual probe classes or use the registry:
 """
 
 from promptcanary.core.probes.base import BaseProbe, get_probe, get_probe_registry, probe
+from promptcanary.core.probes.tool_use import (
+    ToolCallArgsProbe,
+    ToolCallNameProbe,
+    ToolCallPresenceProbe,
+    ToolCallSchemaProbe,
+)
 from promptcanary.core.probes.format import (
     ExpectedKeywordsProbe,
     JsonKeyOrderProbe,
@@ -39,6 +45,11 @@ __all__ = [
     "get_probe",
     "get_probe_registry",
     "probe",
+    # Tool Use
+    "ToolCallPresenceProbe",
+    "ToolCallNameProbe",
+    "ToolCallArgsProbe",
+    "ToolCallSchemaProbe",
     # Format
     "JsonValidityProbe",
     "JsonSchemaProbe",

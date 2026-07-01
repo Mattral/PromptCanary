@@ -3,7 +3,7 @@
 # This example covers the most common behavioral drift scenarios.
 # Copy and customize for your production use case.
 #
-# Run: promptcanary run --config canary.yaml --provider openai/gpt-4o
+# Run: promptcanary run --config canary.yaml --provider openai/gpt-5.4
 
 name: example-production-suite
 description: |
@@ -12,7 +12,7 @@ description: |
 
 tags:
   - production
-  - gpt-4o
+  - gpt-5.4
   - customer-support
 
 # Optional: default system prompt applied to all prompts unless overridden.

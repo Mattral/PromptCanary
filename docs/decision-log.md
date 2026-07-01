@@ -1,3 +1,13 @@
+---
+title: Decision Log
+---
+
+<!--
+  This page mirrors the repository root DECISION_LOG.md.
+  Source of truth: /DECISION_LOG.md — edit there, not here.
+  Regenerate with: python docs/sync_root_docs.py
+-->
+
 # Decision Log — PromptCanary
 
 Architecture Decision Records (ADRs) for PromptCanary v0.1.

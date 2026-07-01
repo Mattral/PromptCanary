@@ -1,3 +1,13 @@
+---
+title: Changelog
+---
+
+<!--
+  This page mirrors the repository root CHANGELOG.md.
+  Source of truth: /CHANGELOG.md — edit there, not here.
+  Regenerate with: python docs/sync_root_docs.py
+-->
+
 # Changelog
 
 All notable changes to **PromptCanary** are documented here.

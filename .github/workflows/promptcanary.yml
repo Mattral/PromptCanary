@@ -13,7 +13,7 @@ on:
       provider:
         description: "LiteLLM model string to test"
         required: false
-        default: "openai/gpt-4o"
+        default: "openai/gpt-5.4"
       fail_on_drift:
         description: "Fail the job if drift is detected"
         required: false
@@ -55,7 +55,7 @@ jobs:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: |
-          PROVIDER="${{ github.event.inputs.provider || 'openai/gpt-4o' }}"
+          PROVIDER="${{ github.event.inputs.provider || 'openai/gpt-5.4' }}"
           echo "Running canary against provider: $PROVIDER"
 
           promptcanary run \
