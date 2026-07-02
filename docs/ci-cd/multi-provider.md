@@ -78,6 +78,6 @@ If **all** providers regress simultaneously on the same prompts, suspect
 your own harness: a `canary.yaml` edit, a probe configuration change, or
 an infrastructure issue — not the model providers themselves.
 
-See [`notebooks/ci_integration.ipynb`](https://github.com/promptcanary/promptcanary/blob/main/notebooks/ci_integration.ipynb)
+See [`notebooks/ci_integration.ipynb`](https://github.com/Mattral/PromptCanary/blob/main/notebooks/ci_integration.ipynb)
 for a runnable version of this scheduling strategy with a live provider
 reference table.

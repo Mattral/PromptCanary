@@ -34,7 +34,7 @@ jobs:
 ## Full-Featured Workflow
 
 The repository ships a production-ready workflow at
-[`.github/workflows/promptcanary.yml`](https://github.com/promptcanary/promptcanary/blob/main/.github/workflows/promptcanary.yml)
+[`.github/workflows/promptcanary.yml`](https://github.com/Mattral/PromptCanary/blob/main/.github/workflows/promptcanary.yml)
 with:
 
 - Scheduled weekly run + manual `workflow_dispatch` trigger with a

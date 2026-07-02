@@ -1,8 +1,8 @@
 blank_issues_enabled: false
 contact_links:
   - name: Question or Discussion
-    url: https://github.com/promptcanary/promptcanary/discussions
+    url: https://github.com/Mattral/PromptCanary/discussions
     about: For questions, ideas, or general discussion, please use GitHub Discussions instead of an issue.
   - name: Security Vulnerability
-    url: https://github.com/promptcanary/promptcanary/security/policy
+    url: https://github.com/Mattral/PromptCanary/security/policy
     about: Please report security vulnerabilities privately per SECURITY.md — do not open a public issue.
