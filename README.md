@@ -25,6 +25,12 @@
   <a href="https://hits.sh/github.com/Mattral/PromptCanary/">
     <img alt="Hits" src="https://hits.sh/github.com/Mattral/PromptCanary.svg?style=for-the-badge&color=10B981&label=views">
   </a>
+  <p align="center">
+  <a href="https://github.com/Mattral/PromptCanary/tree/main/notebooks">
+    <img src="https://img.shields.io/badge/Open_in_Colab-Notebooks-7C3AED?style=for-the-badge&logo=googlecolab&logoColor=white" alt="Open Notebooks in Colab">
+  </a>
+</p>
+
 </p>
 
 ---
