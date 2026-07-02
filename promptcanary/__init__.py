@@ -66,7 +66,7 @@ from promptcanary.core.suite import CanarySuite
 from promptcanary.providers.litellm import LiteLLMProvider
 from promptcanary.storage.file import FileBaselineStore
 
-__version__ = "0.2.1"
+__version__ = "0.2.2"
 __author__ = "PromptCanary Contributors"
 
 __all__ = [  # noqa: RUF022
