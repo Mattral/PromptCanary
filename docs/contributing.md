@@ -280,7 +280,7 @@ A probe accepted into the core library must:
 
 ## Questions?
 
-Open a [GitHub Discussion](https://github.com/promptcanary/promptcanary/discussions)
+Open a [GitHub Discussion](https://github.com/Mattral/PromptCanary/discussions)
 or drop into the issues. We aim to respond within 48 hours.
 
 ---
