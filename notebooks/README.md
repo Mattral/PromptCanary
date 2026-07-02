@@ -3,8 +3,6 @@
 Interactive notebooks for exploring PromptCanary features and workflows.  
 Each notebook can be launched directly in Google Colab for quick experimentation.
 
-
-
 ---
 
 ## Available Notebooks

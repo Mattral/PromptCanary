@@ -1,8 +1,8 @@
 site_name: PromptCanary
 site_description: Detect silent behavioral drift in LLM providers — before it breaks production.
-site_url: https://promptcanary.readthedocs.io
-repo_url: https://github.com/promptcanary/promptcanary
-repo_name: promptcanary/promptcanary
+site_url: https://mattral.github.io/PromptCanary/
+repo_url: https://github.com/Mattral/PromptCanary
+repo_name: Mattral/PromptCanary
 edit_uri: edit/main/docs/
 
 theme:
@@ -116,7 +116,7 @@ markdown_extensions:
 extra:
   social:
     - icon: fontawesome/brands/github
-      link: https://github.com/promptcanary/promptcanary
+      link: https://github.com/Mattral/PromptCanary
     - icon: fontawesome/brands/python
       link: https://pypi.org/project/promptcanary/
 
