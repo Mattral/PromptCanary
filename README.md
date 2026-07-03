@@ -2,12 +2,30 @@
 
 **Detect silent behavioral drift in LLM providers — before it breaks production.**
 
-[![CI](https://github.com/promptcanary/promptcanary/actions/workflows/ci.yml/badge.svg)](https://github.com/promptcanary/promptcanary/actions/workflows/ci.yml)
-[![PyPI](https://img.shields.io/pypi/v/promptcanary.svg)](https://pypi.org/project/promptcanary/)
-[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-[![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
-[![Checked with mypy](https://www.mypy-lang.org/static/mypy_badge.svg)](https://mypy-lang.org/)
+
+<p align="center">
+  <a href="https://github.com/Mattral/PromptCanary/actions/workflows/ci.yml">
+    <img alt="CI" src="https://img.shields.io/github/actions/workflow/status/Mattral/PromptCanary/ci.yml?style=for-the-badge&logo=github&label=CI">
+  </a>
+  <a href="https://pypi.org/project/promptcanary/">
+    <img alt="PyPI" src="https://img.shields.io/pypi/v/promptcanary?style=for-the-badge&logo=pypi&logoColor=white&color=7C3AED">
+  </a>
+  <a href="https://www.python.org/downloads/">
+    <img alt="Python 3.10+" src="https://img.shields.io/badge/python-3.10+-blue?style=for-the-badge&logo=python&logoColor=white">
+  </a>
+  <a href="./LICENSE">
+    <img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-green?style=for-the-badge">
+  </a>
+  <a href="https://github.com/astral-sh/ruff">
+    <img alt="Ruff" src="https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json&style=for-the-badge">
+  </a>
+  <a href="https://mypy-lang.org/">
+    <img alt="Checked with mypy" src="https://img.shields.io/badge/mypy-checked-1E40AF?style=for-the-badge&logo=python&logoColor=white">
+  </a>
+  <a href="https://hits.sh/github.com/Mattral/PromptCanary/">
+    <img alt="Hits" src="https://hits.sh/github.com/Mattral/PromptCanary.svg?style=for-the-badge&color=10B981&label=views">
+  </a>
+</p>
 
 ---
 
