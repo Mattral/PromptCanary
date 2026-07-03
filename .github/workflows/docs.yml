@@ -8,6 +8,7 @@ on:
       - "mkdocs.yml"
       - "DECISION_LOG.md"
       - "CONTRIBUTING.md"
+      - "CODE_OF_CONDUCT.md"
       - "CHANGELOG.md"
       - "promptcanary/**"   # docstrings feed mkdocstrings API reference
   workflow_dispatch:
