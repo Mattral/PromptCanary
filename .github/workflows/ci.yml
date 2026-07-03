@@ -24,16 +24,16 @@ jobs:
           python-version: "3.12"
           cache: "pip"
 
-      - name: Install dev dependencies
+      - name: Install package + dev dependencies
         run: |
           pip install --upgrade pip
-          pip install ruff mypy pydantic typer rich litellm pyyaml python-dateutil httpx
+          pip install -e ".[dev]"
 
       - name: Run ruff (lint)
-        run: ruff check promptcanary/
+        run: ruff check promptcanary/ tests/
 
       - name: Run ruff (format check)
-        run: ruff format --check promptcanary/
+        run: ruff format --check promptcanary/ tests/
 
       - name: Run mypy
         run: mypy promptcanary/ --ignore-missing-imports
