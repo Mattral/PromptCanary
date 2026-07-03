@@ -72,7 +72,7 @@ class JsonSchemaProbe(BaseProbe):
         forbidden_keys: Keys that MUST NOT be present.
         score_per_key:  Whether to give partial credit for partial matches.
 
-    Score: Fraction of required_keys present (0.0–1.0).
+    Score: Fraction of required_keys present (0.0-1.0).
     """
 
     probe_id = "json_schema"
@@ -180,7 +180,9 @@ class JsonKeyOrderProbe(BaseProbe):
             data: dict[str, Any] = json.loads(content)
         except json.JSONDecodeError:
             return self._make_result(
-                prompt.id, passed=False, score=0.0,
+                prompt.id,
+                passed=False,
+                score=0.0,
                 details="Response is not valid JSON.",
             )
 
@@ -190,7 +192,9 @@ class JsonKeyOrderProbe(BaseProbe):
 
         if not filtered_expected:
             return self._make_result(
-                prompt.id, passed=True, score=1.0,
+                prompt.id,
+                passed=True,
+                score=1.0,
                 details="No expected keys found in response; order check skipped.",
             )
 
@@ -264,13 +268,17 @@ class ResponseLengthProbe(BaseProbe):
         # Hard bounds check
         if length < self.min_chars:
             return self._make_result(
-                prompt.id, passed=False, score=0.0,
+                prompt.id,
+                passed=False,
+                score=0.0,
                 details=f"Response too short: {length} chars (min: {self.min_chars}).",
                 metadata=meta,
             )
         if self.max_chars and length > self.max_chars:
             return self._make_result(
-                prompt.id, passed=False, score=0.0,
+                prompt.id,
+                passed=False,
+                score=0.0,
                 details=f"Response too long: {length} chars (max: {self.max_chars}).",
                 metadata=meta,
             )
@@ -298,7 +306,9 @@ class ResponseLengthProbe(BaseProbe):
             )
 
         return self._make_result(
-            prompt.id, passed=True, score=1.0,
+            prompt.id,
+            passed=True,
+            score=1.0,
             details=f"Response length {length} chars — within bounds.",
             metadata=meta,
         )
@@ -437,7 +447,9 @@ class ExpectedKeywordsProbe(BaseProbe):
     def evaluate(self, prompt: CanaryPrompt, response: LLMResponse) -> ProbeResult:
         if not prompt.expected_keywords:
             return self._make_result(
-                prompt.id, passed=True, score=1.0,
+                prompt.id,
+                passed=True,
+                score=1.0,
                 details="No expected_keywords defined on prompt — skipped.",
             )
         content = response.content.lower()
@@ -448,7 +460,8 @@ class ExpectedKeywordsProbe(BaseProbe):
             passed=not missing,
             score=score,
             details=(
-                f"Missing: {missing}." if missing
+                f"Missing: {missing}."
+                if missing
                 else f"All {len(prompt.expected_keywords)} expected keywords found."
             ),
             metadata={"missing": missing},

@@ -57,13 +57,13 @@ class ToolCallPresenceProbe(BaseProbe):
     category = ProbeCategory.TOOL_USE
     description = "Detects whether any tool/function call is present in the response."
 
-    _TEXT_PATTERNS = [
+    _TEXT_PATTERNS = [  # noqa: RUF012
         r'"function"\s*:\s*"',
         r'"tool_calls"\s*:\s*\[',
         r'"name"\s*:\s*"\w+"\s*,\s*"arguments"',
-        r'<tool_call>',
-        r'<function_calls>',
-        r'\bfunctions?\.\w+\(',
+        r"<tool_call>",
+        r"<function_calls>",
+        r"\bfunctions?\.\w+\(",
     ]
 
     def __init__(
@@ -178,7 +178,7 @@ class ToolCallNameProbe(BaseProbe):
                 metadata={"extracted_names": [], "expected": self.expected_name},
             )
 
-        all_accepted = [self.expected_name] + self.allow_aliases
+        all_accepted = [self.expected_name, *self.allow_aliases]
         if not self.case_sensitive:
             all_accepted_lower = [n.lower() for n in all_accepted]
             extracted_lower = [n.lower() for n in extracted_names]
@@ -201,8 +201,7 @@ class ToolCallNameProbe(BaseProbe):
             passed=False,
             score=0.3,
             details=(
-                f"Wrong function called: {extracted_names}. "
-                f"Expected: '{self.expected_name}'."
+                f"Wrong function called: {extracted_names}. Expected: '{self.expected_name}'."
             ),
             metadata={"extracted_names": extracted_names, "expected": self.expected_name},
         )
@@ -258,7 +257,7 @@ class ToolCallArgsProbe(BaseProbe):
         required_args:   Argument keys that must appear in the call.
         forbidden_args:  Argument keys that must NOT appear.
 
-    Score: Fraction of required_args present (0.0–1.0), penalised for forbidden.
+    Score: Fraction of required_args present (0.0-1.0), penalised for forbidden.
 
     Example::
 
@@ -286,7 +285,9 @@ class ToolCallArgsProbe(BaseProbe):
 
         if not arg_keys and not self.required_args:
             return self._make_result(
-                prompt.id, passed=True, score=1.0,
+                prompt.id,
+                passed=True,
+                score=1.0,
                 details="No args required and none found.",
             )
 
@@ -356,8 +357,14 @@ class ToolCallArgsProbe(BaseProbe):
                 candidate = m.group(1)
                 # Exclude structural keys
                 if candidate not in {
-                    "function", "name", "arguments", "tool_calls",
-                    "type", "id", "role", "content",
+                    "function",
+                    "name",
+                    "arguments",
+                    "tool_calls",
+                    "type",
+                    "id",
+                    "role",
+                    "content",
                 }:
                     keys.add(candidate)
 
@@ -394,9 +401,13 @@ class ToolCallSchemaProbe(BaseProbe):
 
     def __init__(self, schema: dict[str, Any]) -> None:
         self.schema = schema
-        self._name_probe = ToolCallNameProbe(
-            schema.get("name", ""),
-        ) if schema.get("name") else None
+        self._name_probe = (
+            ToolCallNameProbe(
+                schema.get("name", ""),
+            )
+            if schema.get("name")
+            else None
+        )
         self._args_probe = ToolCallArgsProbe(
             required_args=schema.get("required_args", []),
             forbidden_args=schema.get("forbidden_args", []),
@@ -457,8 +468,9 @@ class ToolCallSchemaProbe(BaseProbe):
         def _find_args(obj: Any) -> dict[str, Any]:
             if isinstance(obj, dict):
                 for k in ("arguments", "parameters", "args", "input"):
-                    if k in obj and isinstance(obj[k], dict):
-                        return obj[k]
+                    val = obj.get(k)
+                    if isinstance(val, dict):
+                        return val
                 for v in obj.values():
                     result = _find_args(v)
                     if result:
