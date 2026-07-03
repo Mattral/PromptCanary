@@ -193,11 +193,60 @@ Before opening a PR, please ensure:
 
 - [ ] All existing tests pass: `pytest tests/`
 - [ ] New tests added (aim for ≥80% coverage on new code)
-- [ ] Ruff passes: `ruff check promptcanary/`
-- [ ] Mypy passes: `mypy promptcanary/`
+- [ ] Lint passes: `ruff check promptcanary/ tests/`
+- [ ] Format passes: `ruff format --check promptcanary/ tests/`
+- [ ] Type check passes: `mypy promptcanary/ --ignore-missing-imports`
 - [ ] Docstrings on all public classes/methods
 - [ ] `CHANGELOG.md` updated under `[Unreleased]`
 - [ ] PR description explains the **what** and the **why**
+
+These are exactly the checks `.github/workflows/ci.yml` runs — if they pass
+locally, CI will pass too, **provided you installed dependencies the same
+way CI does** (see Release Checklist below for why this matters).
+
+---
+
+## Release Checklist
+
+Before tagging a release, verify in a **completely clean environment** —
+not your regular development virtualenv, which accumulates packages from
+unrelated `pip install` commands over time and can mask a missing
+dependency declaration in `pyproject.toml`. This exact failure mode has
+bitten this project twice (see `CHANGELOG.md` v0.2.1 and v0.2.2): a check
+passed locally only because a package happened to already be installed,
+then failed in CI's genuinely clean environment.
+
+```bash
+# 1. Create a throwaway virtualenv — do NOT reuse your dev environment
+python3 -m venv /tmp/release_check
+source /tmp/release_check/bin/activate
+
+# 2. Install ONLY what pyproject.toml declares — mirrors CI exactly
+pip install -e ".[dev]"
+
+# 3. Run every check CI runs, in order
+ruff check promptcanary/ tests/
+ruff format --check promptcanary/ tests/
+mypy promptcanary/ --ignore-missing-imports
+pytest tests/
+
+# 4. Also verify the full extras combination a contributor might install
+pip install -e ".[dev,viz]"
+mypy promptcanary/ --ignore-missing-imports
+pytest tests/
+
+# 5. Verify the package builds and imports cleanly
+python -m build
+pip install dist/*.whl --force-reinstall
+python -c "import promptcanary; print(promptcanary.__version__)"
+
+deactivate
+rm -rf /tmp/release_check
+```
+
+If all of these pass in the throwaway environment, CI will pass on the
+same commit — with no surprises from packages that were only ever
+installed by accident during earlier development.
 
 ---
 
