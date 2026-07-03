@@ -253,7 +253,7 @@ core delight factor." This requires a charting library, but PromptCanary's
 core philosophy is minimal required dependencies.
 
 ### Options Considered
-1. **Require Plotly/pandas in core** — best visuals, but bloats every install,
+1. **Require Plotly in core** — best visuals, but bloats every install,
    even for users who only need the CLI.
 2. **Matplotlib** — lighter than Plotly, but static images don't suit
    notebook/HTML delight goals as well as interactive charts.
@@ -282,9 +282,75 @@ ASCII implementation.
 - Two implementations must be kept in sync for every new chart type added
   (a maintenance cost, accepted as worth it for the dependency guarantee).
 - `tests/unit/test_visualization.py` skips Plotly-specific assertions via
-  `pytest.mark.skipif(not _plotly_available())`, so CI passes identically
-  whether or not the `viz` extra is installed — both code paths are
-  exercised in CI today since `[dev,viz]` installs both together.
+  `pytest.mark.skipif(not _plotly_available())`. The `ci.yml` `test` job
+  installs only `[dev]` (not `[viz]`), so those assertions are skipped in
+  standard CI runs; the ASCII-rendering code path is what's continuously
+  verified. The Plotly-rendering path is exercised by installing `[viz]`
+  locally (or in a dedicated CI matrix leg, not yet added — see ADR-011).
+
+---
+
+## ADR-011: `[viz]` Extra Does Not Include pandas
+
+**Date**: 2026-07-03
+**Status**: Accepted
+
+### Context
+The original `[viz]` extra declared both `plotly` and `pandas`. An audit
+found `pandas` was never actually imported anywhere in the codebase — only
+mentioned in a docstring — and it was the sole source of a transitive
+`numpy` dependency.
+
+### The problem this caused
+`numpy` 2.5 ships type stubs using unconditional PEP 695 syntax
+(`type X = ...` statements) that only parse under Python 3.12+. Our
+`[tool.mypy]` config pins `python_version = "3.10"` deliberately, since
+`promptcanary` supports 3.10+ and we want mypy to catch any accidental use
+of newer-than-3.10 syntax in our own code. When `numpy` was present in the
+environment (via `pandas`, via `[viz]`), `mypy promptcanary/` failed with
+a hard parse error on numpy's own stub file — before mypy could even begin
+checking our code — regardless of `ignore_missing_imports`, per-module
+`ignore_errors`, or `follow_imports = "skip"` overrides, none of which
+prevent a stub *parse* failure (as opposed to suppressing reported errors
+after a successful parse).
+
+### Options Considered
+1. **Raise `python_version` to 3.12 project-wide** — fixes the parse issue,
+   but silently permits 3.11/3.12-only syntax in our own code while we
+   claim 3.10+ runtime support. Rejected: too large a blast radius for a
+   dependency we don't even use.
+2. **Per-module mypy overrides targeting numpy** — tried `ignore_errors`
+   and `follow_imports = "skip"`; neither prevented the parse failure,
+   because `pandas`'s own stubs import `numpy` internally, forcing
+   resolution regardless of overrides on our side.
+3. **Remove the unused `pandas` dependency entirely** — `plotly` alone
+   (verified via a clean isolated install) does not pull in `numpy` at
+   all. Since `pandas` was dead weight to begin with, this fixes the mypy
+   issue at its root instead of working around a symptom.
+
+### Decision
+Removed `pandas` from `[viz]`. `viz = ["plotly>=5.18.0"]` only.
+
+### Rationale
+- `pandas` was never used — removing it is a pure simplification, not a
+  functionality trade-off.
+- Fixing the root cause (an unused, unnecessarily-heavy dependency) beats
+  adding mypy configuration complexity to work around a problem that
+  dependency shouldn't have introduced in the first place.
+- Discovered via a clean-room verification: installing *only* what
+  `pyproject.toml` declares into a fresh virtualenv, rather than trusting
+  a development environment that had accumulated packages from earlier ad
+  hoc `pip install` commands. This is now standard practice before any
+  release — see the release checklist in `CONTRIBUTING.md`.
+
+### Consequences
+- `promptcanary[viz]` installs faster and lighter (no `numpy`/`pandas`
+  pulled in transitively).
+- If a genuine `pandas` need arises later (e.g. a tabular export feature),
+  re-adding it will require re-litigating this ADR and re-solving the
+  numpy/mypy stub-parsing interaction — most likely via option 1
+  (bumping `python_version`) if by then our minimum supported Python has
+  also moved to 3.12+, which would make the trade-off moot.
 
 ---
 
