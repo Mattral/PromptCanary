@@ -12,7 +12,7 @@ from a sequence of baseline snapshots or run results. Works in three modes:
   3. **ASCII mode**    — terminal sparklines when neither Plotly nor a notebook
                          is available (zero extra deps).
 
-Optional dependency: ``pip install promptcanary[viz]``  (adds plotly + pandas).
+Optional dependency: ``pip install promptcanary[viz]``  (adds plotly).
 The module degrades gracefully — ASCII mode is always available.
 """
 
