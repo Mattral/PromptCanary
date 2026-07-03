@@ -86,7 +86,7 @@ class LiteLLMProvider(BaseLLMProvider):
         super().__init__(config)
 
     @classmethod
-    def from_config(cls, config: ProviderConfig) -> "LiteLLMProvider":
+    def from_config(cls, config: ProviderConfig) -> LiteLLMProvider:
         """Create a provider directly from a :class:`ProviderConfig`."""
         return cls(config)
 
@@ -109,7 +109,7 @@ class LiteLLMProvider(BaseLLMProvider):
             ProviderError: On API errors, auth failures, or network issues.
         """
         try:
-            import litellm  # type: ignore[import-untyped]
+            import litellm
         except ImportError as e:
             raise ProviderError(
                 "LiteLLM is not installed. Run: pip install litellm",
