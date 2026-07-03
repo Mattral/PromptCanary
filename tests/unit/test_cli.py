@@ -19,7 +19,7 @@ import pytest
 from typer.testing import CliRunner
 
 from promptcanary.cli import app
-from promptcanary.core.models import CanaryRunResult, LLMResponse, ProviderConfig
+from promptcanary.core.models import LLMResponse, ProviderConfig
 from promptcanary.providers.base import BaseLLMProvider
 
 runner = CliRunner()
@@ -58,6 +58,7 @@ def project_dir(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
 # init
 # ─────────────────────────────────────────────────────────────────────────────
 
+
 class TestInitCommand:
     def test_creates_suite_directory(self, project_dir: Path) -> None:
         result = runner.invoke(app, ["init", "my-suite"])
@@ -85,6 +86,7 @@ class TestInitCommand:
     def test_yaml_is_valid_and_loadable(self, project_dir: Path) -> None:
         runner.invoke(app, ["init", "loadable-suite"])
         from promptcanary.core.suite import CanarySuite
+
         suite = CanarySuite.from_yaml(project_dir / "loadable-suite" / "canary.yaml")
         assert len(suite.prompts) > 0
         assert len(suite.probes) > 0
@@ -93,6 +95,7 @@ class TestInitCommand:
 # ─────────────────────────────────────────────────────────────────────────────
 # run
 # ─────────────────────────────────────────────────────────────────────────────
+
 
 class TestRunCommand:
     def test_missing_config_fails_with_helpful_message(self, project_dir: Path) -> None:
@@ -113,8 +116,16 @@ class TestRunCommand:
         out_json = project_dir / "results.json"
         result = runner.invoke(
             app,
-            ["run", "--config", str(config), "--provider", "openai/gpt-5.5",
-             "--output-json", str(out_json), "--no-progress"],
+            [
+                "run",
+                "--config",
+                str(config),
+                "--provider",
+                "openai/gpt-5.5",
+                "--output-json",
+                str(out_json),
+                "--no-progress",
+            ],
         )
         assert result.exit_code == 0
         assert out_json.exists()
@@ -128,8 +139,18 @@ class TestRunCommand:
         out_html = project_dir / "report.html"
         result = runner.invoke(
             app,
-            ["run", "--config", str(config), "--provider", "openai/gpt-5.5",
-             "--output-md", str(out_md), "--output-html", str(out_html), "--no-progress"],
+            [
+                "run",
+                "--config",
+                str(config),
+                "--provider",
+                "openai/gpt-5.5",
+                "--output-md",
+                str(out_md),
+                "--output-html",
+                str(out_html),
+                "--no-progress",
+            ],
         )
         assert result.exit_code == 0
         assert out_md.exists()
@@ -141,8 +162,17 @@ class TestRunCommand:
         baseline_dir = project_dir / "suite" / "baselines"
         result = runner.invoke(
             app,
-            ["run", "--config", str(config), "--provider", "openai/gpt-5.5",
-             "--save-baseline", "--baseline-dir", str(baseline_dir), "--no-progress"],
+            [
+                "run",
+                "--config",
+                str(config),
+                "--provider",
+                "openai/gpt-5.5",
+                "--save-baseline",
+                "--baseline-dir",
+                str(baseline_dir),
+                "--no-progress",
+            ],
         )
         assert result.exit_code == 0
         assert list(baseline_dir.glob("*.json"))
@@ -160,6 +190,7 @@ class TestRunCommand:
 # compare
 # ─────────────────────────────────────────────────────────────────────────────
 
+
 class TestCompareCommand:
     def test_compare_with_fresh_provider_run_no_baseline_creates_one(
         self, project_dir: Path
@@ -170,8 +201,16 @@ class TestCompareCommand:
 
         result = runner.invoke(
             app,
-            ["compare", "--config", str(config), "--provider", "openai/gpt-5.5",
-             "--baseline-dir", str(baseline_dir), "--no-progress"],
+            [
+                "compare",
+                "--config",
+                str(config),
+                "--provider",
+                "openai/gpt-5.5",
+                "--baseline-dir",
+                str(baseline_dir),
+                "--no-progress",
+            ],
         )
         # No baseline exists yet → should fail cleanly, not crash
         assert result.exit_code in (0, 1)
@@ -184,8 +223,17 @@ class TestCompareCommand:
         # Create a baseline first
         runner.invoke(
             app,
-            ["run", "--config", str(config), "--provider", "openai/gpt-5.5",
-             "--save-baseline", "--baseline-dir", str(baseline_dir), "--no-progress"],
+            [
+                "run",
+                "--config",
+                str(config),
+                "--provider",
+                "openai/gpt-5.5",
+                "--save-baseline",
+                "--baseline-dir",
+                str(baseline_dir),
+                "--no-progress",
+            ],
         )
         baseline_file = next(baseline_dir.glob("*.json"))
 
@@ -193,8 +241,16 @@ class TestCompareCommand:
         current_json = project_dir / "current.json"
         runner.invoke(
             app,
-            ["run", "--config", str(config), "--provider", "openai/gpt-5.5",
-             "--output-json", str(current_json), "--no-progress"],
+            [
+                "run",
+                "--config",
+                str(config),
+                "--provider",
+                "openai/gpt-5.5",
+                "--output-json",
+                str(current_json),
+                "--no-progress",
+            ],
         )
 
         result = runner.invoke(
@@ -209,8 +265,17 @@ class TestCompareCommand:
         baseline_dir = project_dir / "suite" / "baselines"
         runner.invoke(
             app,
-            ["run", "--config", str(config), "--provider", "openai/gpt-5.5",
-             "--save-baseline", "--baseline-dir", str(baseline_dir), "--no-progress"],
+            [
+                "run",
+                "--config",
+                str(config),
+                "--provider",
+                "openai/gpt-5.5",
+                "--save-baseline",
+                "--baseline-dir",
+                str(baseline_dir),
+                "--no-progress",
+            ],
         )
         baseline_file = next(baseline_dir.glob("*.json"))
 
@@ -221,6 +286,7 @@ class TestCompareCommand:
 # ─────────────────────────────────────────────────────────────────────────────
 # baselines
 # ─────────────────────────────────────────────────────────────────────────────
+
 
 class TestBaselinesCommand:
     def test_lists_empty_directory(self, project_dir: Path) -> None:
@@ -234,8 +300,17 @@ class TestBaselinesCommand:
         baseline_dir = project_dir / "suite" / "baselines"
         runner.invoke(
             app,
-            ["run", "--config", str(config), "--provider", "openai/gpt-5.5",
-             "--save-baseline", "--baseline-dir", str(baseline_dir), "--no-progress"],
+            [
+                "run",
+                "--config",
+                str(config),
+                "--provider",
+                "openai/gpt-5.5",
+                "--save-baseline",
+                "--baseline-dir",
+                str(baseline_dir),
+                "--no-progress",
+            ],
         )
         result = runner.invoke(app, ["baselines", "--dir", str(baseline_dir)])
         assert result.exit_code == 0
@@ -245,6 +320,7 @@ class TestBaselinesCommand:
 # ─────────────────────────────────────────────────────────────────────────────
 # report
 # ─────────────────────────────────────────────────────────────────────────────
+
 
 class TestReportCommand:
     def test_report_missing_file_fails(self, project_dir: Path) -> None:
@@ -257,8 +333,16 @@ class TestReportCommand:
         out_json = project_dir / "results.json"
         runner.invoke(
             app,
-            ["run", "--config", str(config), "--provider", "openai/gpt-5.5",
-             "--output-json", str(out_json), "--no-progress"],
+            [
+                "run",
+                "--config",
+                str(config),
+                "--provider",
+                "openai/gpt-5.5",
+                "--output-json",
+                str(out_json),
+                "--no-progress",
+            ],
         )
         result = runner.invoke(app, ["report", str(out_json), "--format", "terminal"])
         assert result.exit_code == 0
@@ -269,8 +353,16 @@ class TestReportCommand:
         out_json = project_dir / "results.json"
         runner.invoke(
             app,
-            ["run", "--config", str(config), "--provider", "openai/gpt-5.5",
-             "--output-json", str(out_json), "--no-progress"],
+            [
+                "run",
+                "--config",
+                str(config),
+                "--provider",
+                "openai/gpt-5.5",
+                "--output-json",
+                str(out_json),
+                "--no-progress",
+            ],
         )
         out_md = project_dir / "report_from_json.md"
         result = runner.invoke(
@@ -285,8 +377,16 @@ class TestReportCommand:
         out_json = project_dir / "results.json"
         runner.invoke(
             app,
-            ["run", "--config", str(config), "--provider", "openai/gpt-5.5",
-             "--output-json", str(out_json), "--no-progress"],
+            [
+                "run",
+                "--config",
+                str(config),
+                "--provider",
+                "openai/gpt-5.5",
+                "--output-json",
+                str(out_json),
+                "--no-progress",
+            ],
         )
         result = runner.invoke(app, ["report", str(out_json), "--format", "xml"])
         assert result.exit_code == 1
@@ -295,6 +395,7 @@ class TestReportCommand:
 # ─────────────────────────────────────────────────────────────────────────────
 # version
 # ─────────────────────────────────────────────────────────────────────────────
+
 
 class TestVersionCommand:
     def test_version_prints_something(self) -> None:
@@ -306,6 +407,7 @@ class TestVersionCommand:
 # ─────────────────────────────────────────────────────────────────────────────
 # Top-level help
 # ─────────────────────────────────────────────────────────────────────────────
+
 
 class TestHelp:
     def test_no_args_shows_help(self) -> None:
