@@ -2,7 +2,7 @@
 
 **Detect silent behavioral drift in LLM providers — before it breaks production.**
 
-[![CI](https://github.com/promptcanary/promptcanary/actions/workflows/ci.yml/badge.svg)](https://github.com/promptcanary/promptcanary/actions/workflows/ci.yml)
+[![CI](https://github.com/promptcanary/actions/workflows/ci.yml/badge.svg)](https://github.com/promptcanary/promptcanary/actions/workflows/ci.yml)
 [![PyPI](https://img.shields.io/pypi/v/promptcanary.svg)](https://pypi.org/project/promptcanary/)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
