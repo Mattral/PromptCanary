@@ -8,7 +8,8 @@ a documentation improvement, or a community canary suite.
 
 ## Code of Conduct
 
-This project follows the [Contributor Covenant v2.1](https://www.contributor-covenant.org/version/2/1/code_of_conduct/).
+This project follows the [Contributor Covenant v2.1](https://www.contributor-covenant.org/version/2/1/code_of_conduct/),
+reproduced in full in [`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md).
 By participating you agree to uphold these standards. Reports of unacceptable
 behaviour can be sent to conduct@promptcanary.dev (placeholder).
 

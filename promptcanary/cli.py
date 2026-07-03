@@ -15,9 +15,7 @@ Commands:
 from __future__ import annotations
 
 import json
-import sys
 from pathlib import Path
-from typing import Optional
 
 import typer
 from rich.console import Console
@@ -42,6 +40,7 @@ err_console = Console(stderr=True)
 # init
 # ─────────────────────────────────────────────────────────────────────────────
 
+
 @app.command()
 def init(
     name: str = typer.Argument(
@@ -57,8 +56,7 @@ def init(
     suite_dir = Path(name)
     if suite_dir.exists() and not force:
         err_console.print(
-            f"[red]Directory '{name}' already exists.[/red] "
-            "Use [cyan]--force[/cyan] to overwrite."
+            f"[red]Directory '{name}' already exists.[/red] Use [cyan]--force[/cyan] to overwrite."
         )
         raise typer.Exit(1)
 
@@ -106,7 +104,7 @@ prompts:
     tags: [json, format]
 
   - text: |
-      Explain what photosynthesis is in 2–3 sentences.
+      Explain what photosynthesis is in 2-3 sentences.
       Keep it concise and use plain language.
     description: "Verbosity and clarity canary."
     tags: [explanation, verbosity]
@@ -181,24 +179,29 @@ See [PromptCanary docs](https://github.com/promptcanary/promptcanary) for GitHub
 # run
 # ─────────────────────────────────────────────────────────────────────────────
 
+
 @app.command()
 def run(
     config: Path = typer.Option(
         Path("canary.yaml"),
-        "--config", "-c",
+        "--config",
+        "-c",
         help="Path to canary.yaml config file.",
         exists=False,  # We check manually for a better error message
     ),
     provider: str = typer.Option(
         ...,
-        "--provider", "-p",
+        "--provider",
+        "-p",
         help='LiteLLM model string, e.g. "openai/gpt-5.4" or "anthropic/claude-sonnet-4-6".',
     ),
     temperature: float = typer.Option(0.0, "--temperature", "-t", help="Sampling temperature."),
     max_tokens: int = typer.Option(1024, "--max-tokens", help="Max tokens in response."),
-    seed: Optional[int] = typer.Option(42, "--seed", help="Random seed for reproducibility."),
+    seed: int | None = typer.Option(42, "--seed", help="Random seed for reproducibility."),
     save_baseline: bool = typer.Option(
-        False, "--save-baseline", "-s",
+        False,
+        "--save-baseline",
+        "-s",
         help="Save the run result as a new baseline.",
     ),
     baseline_dir: Path = typer.Option(
@@ -206,20 +209,25 @@ def run(
         "--baseline-dir",
         help="Directory for baseline storage.",
     ),
-    output_json: Optional[Path] = typer.Option(
-        None, "--output-json", "-o",
+    output_json: Path | None = typer.Option(
+        None,
+        "--output-json",
+        "-o",
         help="Save raw JSON results to this path.",
     ),
-    output_md: Optional[Path] = typer.Option(
-        None, "--output-md",
+    output_md: Path | None = typer.Option(
+        None,
+        "--output-md",
         help="Save a Markdown report to this path.",
     ),
-    output_html: Optional[Path] = typer.Option(
-        None, "--output-html",
+    output_html: Path | None = typer.Option(
+        None,
+        "--output-html",
         help="Save an HTML report to this path.",
     ),
     fail_on_failure: bool = typer.Option(
-        False, "--fail-on-failure",
+        False,
+        "--fail-on-failure",
         help="Exit with code 1 if any probe fails (useful for CI).",
     ),
     no_progress: bool = typer.Option(False, "--no-progress", help="Disable progress display."),
@@ -240,13 +248,15 @@ def run(
     [dim]# Custom config with output files[/dim]
     promptcanary run -c my-suite/canary.yaml -p openai/gpt-5.4 -o results.json --output-html report.html
     """
-    from promptcanary.core.suite import CanarySuite
     from promptcanary.core.reporter import Reporter
+    from promptcanary.core.suite import CanarySuite
     from promptcanary.providers.litellm import LiteLLMProvider
 
     if not config.exists():
-        err_console.print(f"[red]Config file not found:[/red] {config}\n"
-                          "Run [cyan]promptcanary init[/cyan] to create one.")
+        err_console.print(
+            f"[red]Config file not found:[/red] {config}\n"
+            "Run [cyan]promptcanary init[/cyan] to create one."
+        )
         raise typer.Exit(1)
 
     console.print(f"\n[dim]Loading suite from[/dim] [cyan]{config}[/cyan]…")
@@ -264,7 +274,9 @@ def run(
     )
     console.print(f"[dim]Provider:[/dim] [cyan]{provider}[/cyan]\n")
 
-    llm_provider = LiteLLMProvider(provider, temperature=temperature, max_tokens=max_tokens, seed=seed)
+    llm_provider = LiteLLMProvider(
+        provider, temperature=temperature, max_tokens=max_tokens, seed=seed
+    )
 
     try:
         result = suite.run(
@@ -275,9 +287,11 @@ def run(
             show_progress=not no_progress,
         )
     except Exception as e:
-        err_console.print(f"[red]Run failed:[/red] {e}\n\n"
-                          "Check your API key is set and the provider string is correct.\n"
-                          "Example: [cyan]export OPENAI_API_KEY=sk-...[/cyan]")
+        err_console.print(
+            f"[red]Run failed:[/red] {e}\n\n"
+            "Check your API key is set and the provider string is correct.\n"
+            "Example: [cyan]export OPENAI_API_KEY=sk-...[/cyan]"
+        )
         raise typer.Exit(1) from e
 
     # Print terminal report
@@ -299,6 +313,7 @@ def run(
 
     if save_baseline:
         from promptcanary.storage.file import FileBaselineStore
+
         store = FileBaselineStore(baseline_dir)
         snapshot = store.save(result)
         console.print(
@@ -315,32 +330,42 @@ def run(
 # compare
 # ─────────────────────────────────────────────────────────────────────────────
 
+
 @app.command()
 def compare(
     config: Path = typer.Option(
         Path("canary.yaml"),
-        "--config", "-c",
+        "--config",
+        "-c",
         help="Path to canary.yaml (used to run a fresh comparison).",
     ),
-    provider: Optional[str] = typer.Option(
-        None, "--provider", "-p",
+    provider: str | None = typer.Option(
+        None,
+        "--provider",
+        "-p",
         help="Provider to run fresh comparison against (if --current not given).",
     ),
-    baseline: Optional[Path] = typer.Option(
-        None, "--baseline", "-b",
+    baseline: Path | None = typer.Option(
+        None,
+        "--baseline",
+        "-b",
         help="Path to baseline JSON file. If omitted, loads the most recent baseline.",
     ),
-    current: Optional[Path] = typer.Option(
-        None, "--current",
+    current: Path | None = typer.Option(
+        None,
+        "--current",
         help="Path to current run JSON file. If omitted, runs a fresh query.",
     ),
     baseline_dir: Path = typer.Option(
-        Path("baselines"), "--baseline-dir", help="Baseline storage directory.",
+        Path("baselines"),
+        "--baseline-dir",
+        help="Baseline storage directory.",
     ),
-    output_md: Optional[Path] = typer.Option(None, "--output-md"),
-    output_html: Optional[Path] = typer.Option(None, "--output-html"),
+    output_md: Path | None = typer.Option(None, "--output-md"),
+    output_html: Path | None = typer.Option(None, "--output-html"),
     fail_on_drift: bool = typer.Option(
-        False, "--fail-on-drift",
+        False,
+        "--fail-on-drift",
         help="Exit with code 1 if drift is detected (for CI gating).",
     ),
     no_progress: bool = typer.Option(False, "--no-progress"),
@@ -360,8 +385,8 @@ def compare(
     promptcanary compare --baseline baselines/v1.json --current results.json --fail-on-drift
     """
     from promptcanary.core.comparator import compare as do_compare
+    from promptcanary.core.models import CanaryRunResult
     from promptcanary.core.reporter import DriftReporter
-    from promptcanary.core.models import BaselineSnapshot, CanaryRunResult
     from promptcanary.storage.file import FileBaselineStore
 
     store = FileBaselineStore(baseline_dir)
@@ -375,8 +400,9 @@ def compare(
         try:
             baseline_snap = store.load_latest(suite_name="*" if not config.exists() else "auto")
         except FileNotFoundError as e:
-            err_console.print(f"[red]No baseline found:[/red] {e}\n"
-                              "Run with [cyan]--save-baseline[/cyan] first.")
+            err_console.print(
+                f"[red]No baseline found:[/red] {e}\nRun with [cyan]--save-baseline[/cyan] first."
+            )
             raise typer.Exit(1) from e
 
     # Load or generate current run
@@ -429,13 +455,15 @@ def compare(
 # baselines
 # ─────────────────────────────────────────────────────────────────────────────
 
+
 @app.command()
 def baselines(
     baseline_dir: Path = typer.Option(Path("baselines"), "--dir", "-d"),
-    suite: Optional[str] = typer.Option(None, "--suite", "-s"),
+    suite: str | None = typer.Option(None, "--suite", "-s"),
 ) -> None:
     """List saved baseline snapshots."""
     from rich.table import Table
+
     from promptcanary.storage.file import FileBaselineStore
 
     store = FileBaselineStore(baseline_dir)
@@ -470,17 +498,21 @@ def baselines(
 # report  (offline: generate report from saved JSON)
 # ─────────────────────────────────────────────────────────────────────────────
 
+
 @app.command()
 def report(
     input: Path = typer.Argument(..., help="Path to a saved JSON run result or drift report."),
-    format: str = typer.Option("terminal", "--format", "-f", help="Output format: terminal|markdown|html|json."),
-    output: Optional[Path] = typer.Option(None, "--output", "-o", help="Save report to this path."),
+    format: str = typer.Option(
+        "terminal", "--format", "-f", help="Output format: terminal|markdown|html|json."
+    ),
+    output: Path | None = typer.Option(None, "--output", "-o", help="Save report to this path."),
     open_browser: bool = typer.Option(False, "--open", help="Open HTML report in browser."),
 ) -> None:
     """Generate a report from a saved JSON result file (offline mode)."""
     import webbrowser
+
     from promptcanary.core.models import CanaryRunResult, DriftReport
-    from promptcanary.core.reporter import Reporter, DriftReporter
+    from promptcanary.core.reporter import DriftReporter, Reporter
 
     if not input.exists():
         err_console.print(f"[red]File not found:[/red] {input}")
@@ -489,6 +521,8 @@ def report(
     data = json.loads(input.read_text(encoding="utf-8"))
 
     # Detect whether it's a run result or drift report
+    obj: CanaryRunResult | DriftReport
+    reporter_obj: Reporter | DriftReporter
     if "comparisons" in data:
         obj = DriftReport.model_validate(data)
         reporter_obj = DriftReporter(obj)
@@ -523,10 +557,13 @@ def report(
 # version
 # ─────────────────────────────────────────────────────────────────────────────
 
+
 @app.command()
 def version() -> None:
     """Print PromptCanary version."""
-    from importlib.metadata import version as pkg_version, PackageNotFoundError
+    from importlib.metadata import PackageNotFoundError
+    from importlib.metadata import version as pkg_version
+
     try:
         v = pkg_version("promptcanary")
     except PackageNotFoundError:

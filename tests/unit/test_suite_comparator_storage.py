@@ -25,19 +25,17 @@ from promptcanary.core.models import (
     ProbeCategory,
     ProbeComparison,
     ProbeResult,
-    ProviderConfig,
 )
 from promptcanary.core.probes import JsonValidityProbe, KeywordPresenceProbe
 from promptcanary.core.reporter import DriftReporter, Reporter
 from promptcanary.core.suite import CanarySuite
 from promptcanary.storage.file import FileBaselineStore
-
 from tests.conftest import PROVIDER_CFG, MockLLMProvider
-
 
 # ─────────────────────────────────────────────────────────────────────────────
 # CanarySuite construction
 # ─────────────────────────────────────────────────────────────────────────────
+
 
 class TestCanarySuiteConstruction:
     def test_basic_construction(self) -> None:
@@ -92,25 +90,28 @@ class TestCanarySuiteConstruction:
 # CanarySuite.run()
 # ─────────────────────────────────────────────────────────────────────────────
 
+
 class TestCanarySuiteRun:
-    def test_run_returns_result(self, basic_suite: CanarySuite, mock_provider: MockLLMProvider) -> None:
+    def test_run_returns_result(
+        self, basic_suite: CanarySuite, mock_provider: MockLLMProvider
+    ) -> None:
         result = basic_suite.run(mock_provider, show_progress=False)
         assert isinstance(result, CanaryRunResult)
         assert result.suite_name == "test-suite"
-        assert len(result.probe_results) == 1  # 1 prompt × 1 probe
+        assert len(result.probe_results) == 1  # 1 prompt x 1 probe
         assert len(result.llm_responses) == 1
 
     def test_run_calls_provider_once_per_prompt(
         self, full_suite: CanarySuite, mock_provider: MockLLMProvider
     ) -> None:
-        result = full_suite.run(mock_provider, show_progress=False)
+        _result = full_suite.run(mock_provider, show_progress=False)
         assert mock_provider.call_count == 3  # 3 prompts
 
     def test_run_applies_all_probes(
         self, full_suite: CanarySuite, mock_provider: MockLLMProvider
     ) -> None:
         result = full_suite.run(mock_provider, show_progress=False)
-        # 3 prompts × 3 probes = 9 probe results
+        # 3 prompts x 3 probes = 9 probe results
         assert len(result.probe_results) == 9
 
     def test_run_captures_timestamp(
@@ -142,8 +143,10 @@ class TestCanarySuiteRun:
 
     def test_probe_exception_becomes_failure_not_crash(self) -> None:
         """A probe that raises must produce a failed ProbeResult, not crash the run."""
+        from promptcanary.core.models import (
+            LLMResponse,  # noqa: F401 -- used by BrokenProbe type signature
+        )
         from promptcanary.core.probes.base import BaseProbe
-        from promptcanary.core.models import LLMResponse
 
         class BrokenProbe(BaseProbe):
             probe_id = "broken_test_probe"
@@ -167,6 +170,7 @@ class TestCanarySuiteRun:
 # ─────────────────────────────────────────────────────────────────────────────
 # compare()
 # ─────────────────────────────────────────────────────────────────────────────
+
 
 class TestComparator:
     def _make_snapshot(self, results: list[ProbeResult]) -> BaselineSnapshot:
@@ -230,7 +234,7 @@ class TestComparator:
             self._pr("keyword_presence", "p1", 1.0, True),
         ]
         current = [
-            self._pr("json_validity", "p1", 1.0, True),   # stable
+            self._pr("json_validity", "p1", 1.0, True),  # stable
             self._pr("json_validity", "p2", 0.0, False),  # regression
             self._pr("keyword_presence", "p1", 0.5, True),  # minor drop, still passes
         ]
@@ -244,6 +248,7 @@ class TestComparator:
 # ─────────────────────────────────────────────────────────────────────────────
 # FileBaselineStore
 # ─────────────────────────────────────────────────────────────────────────────
+
 
 class TestFileBaselineStore:
     def test_save_and_load_by_id(
@@ -263,35 +268,27 @@ class TestFileBaselineStore:
         files = list(tmp_baselines.glob("*.json"))
         assert len(files) == 1
 
-    def test_load_latest(
-        self, clean_run_result: CanaryRunResult, tmp_baselines: Path
-    ) -> None:
+    def test_load_latest(self, clean_run_result: CanaryRunResult, tmp_baselines: Path) -> None:
         store = FileBaselineStore(tmp_baselines)
         store.save(clean_run_result)
         loaded = store.load_latest(suite_name="test-suite")
         assert loaded.suite_name == "test-suite"
 
-    def test_load_from_path(
-        self, clean_run_result: CanaryRunResult, tmp_baselines: Path
-    ) -> None:
+    def test_load_from_path(self, clean_run_result: CanaryRunResult, tmp_baselines: Path) -> None:
         store = FileBaselineStore(tmp_baselines)
         snap = store.save(clean_run_result)
         files = list(tmp_baselines.glob("*.json"))
         loaded = store.load_from_path(files[0])
         assert loaded.snapshot_id == snap.snapshot_id
 
-    def test_list_baselines(
-        self, clean_run_result: CanaryRunResult, tmp_baselines: Path
-    ) -> None:
+    def test_list_baselines(self, clean_run_result: CanaryRunResult, tmp_baselines: Path) -> None:
         store = FileBaselineStore(tmp_baselines)
         store.save(clean_run_result)
         items = store.list_baselines()
         assert len(items) == 1
         assert items[0]["suite_name"] == "test-suite"
 
-    def test_delete_baseline(
-        self, clean_run_result: CanaryRunResult, tmp_baselines: Path
-    ) -> None:
+    def test_delete_baseline(self, clean_run_result: CanaryRunResult, tmp_baselines: Path) -> None:
         store = FileBaselineStore(tmp_baselines)
         snap = store.save(clean_run_result)
         deleted = store.delete(snap.snapshot_id)
@@ -308,9 +305,7 @@ class TestFileBaselineStore:
         with pytest.raises(FileNotFoundError):
             store.load_latest("test-suite")
 
-    def test_save_with_note(
-        self, clean_run_result: CanaryRunResult, tmp_baselines: Path
-    ) -> None:
+    def test_save_with_note(self, clean_run_result: CanaryRunResult, tmp_baselines: Path) -> None:
         store = FileBaselineStore(tmp_baselines)
         store.save(clean_run_result, note="Pre-release baseline v1")
         items = store.list_baselines()
@@ -320,13 +315,14 @@ class TestFileBaselineStore:
         self, tmp_path: Path, clean_run_result: CanaryRunResult
     ) -> None:
         new_dir = tmp_path / "nested" / "baselines"
-        store = FileBaselineStore(new_dir)
+        _store = FileBaselineStore(new_dir)
         assert new_dir.exists()
 
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Reporter
 # ─────────────────────────────────────────────────────────────────────────────
+
 
 class TestReporter:
     def test_to_markdown_returns_string(self, clean_run_result: CanaryRunResult) -> None:
@@ -358,11 +354,11 @@ class TestReporter:
         assert "<!DOCTYPE html>" in html
         assert "PromptCanary" in html
 
-    def test_print_terminal_no_crash(
-        self, clean_run_result: CanaryRunResult
-    ) -> None:
-        from rich.console import Console
+    def test_print_terminal_no_crash(self, clean_run_result: CanaryRunResult) -> None:
         from io import StringIO
+
+        from rich.console import Console
+
         buf = StringIO()
         con = Console(file=buf, force_terminal=False)
         Reporter(clean_run_result).print_terminal(con)
@@ -373,6 +369,7 @@ class TestReporter:
 class TestDriftReporter:
     def _make_drift_report(self, has_regression: bool):
         from datetime import datetime, timezone
+
         from promptcanary.core.models import DriftReport
 
         delta = -0.8 if has_regression else 0.0

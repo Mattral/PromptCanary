@@ -13,8 +13,6 @@ Each probe class has its own test class covering:
 
 from __future__ import annotations
 
-import pytest
-
 from promptcanary.core.models import CanaryPrompt, LLMResponse, ProbeCategory
 from promptcanary.core.probes.format import (
     ExpectedKeywordsProbe,
@@ -27,6 +25,7 @@ from promptcanary.core.probes.format import (
 )
 
 # ─── Helpers ─────────────────────────────────────────────────────────────────
+
 
 def make_prompt(prompt_id: str = "p1", text: str = "test", **kwargs) -> CanaryPrompt:
     return CanaryPrompt(id=prompt_id, text=text, **kwargs)
@@ -42,6 +41,7 @@ def make_response(content: str, prompt_id: str = "p1") -> LLMResponse:
 
 # ─── JsonValidityProbe ────────────────────────────────────────────────────────
 
+
 class TestJsonValidityProbe:
     probe = JsonValidityProbe()
 
@@ -51,7 +51,7 @@ class TestJsonValidityProbe:
         assert r.score == 1.0
 
     def test_valid_json_array(self) -> None:
-        r = self.probe.evaluate(make_prompt(), make_response('[1, 2, 3]'))
+        r = self.probe.evaluate(make_prompt(), make_response("[1, 2, 3]"))
         assert r.passed
 
     def test_valid_json_with_code_fence(self) -> None:
@@ -79,6 +79,7 @@ class TestJsonValidityProbe:
 
 
 # ─── JsonSchemaProbe ─────────────────────────────────────────────────────────
+
 
 class TestJsonSchemaProbe:
     def test_all_required_keys_present(self) -> None:
@@ -125,6 +126,7 @@ class TestJsonSchemaProbe:
 
 # ─── JsonKeyOrderProbe ────────────────────────────────────────────────────────
 
+
 class TestJsonKeyOrderProbe:
     def test_correct_order(self) -> None:
         probe = JsonKeyOrderProbe(expected_order=["name", "age", "email"])
@@ -151,6 +153,7 @@ class TestJsonKeyOrderProbe:
 
 
 # ─── ResponseLengthProbe ─────────────────────────────────────────────────────
+
 
 class TestResponseLengthProbe:
     def test_within_bounds(self) -> None:
@@ -187,6 +190,7 @@ class TestResponseLengthProbe:
 
 # ─── MarkdownHeaderProbe ─────────────────────────────────────────────────────
 
+
 class TestMarkdownHeaderProbe:
     def test_all_headers_present(self) -> None:
         probe = MarkdownHeaderProbe(expected_headers=["Introduction", "Conclusion"])
@@ -214,6 +218,7 @@ class TestMarkdownHeaderProbe:
 
 # ─── KeywordPresenceProbe ─────────────────────────────────────────────────────
 
+
 class TestKeywordPresenceProbe:
     def test_required_keyword_found(self) -> None:
         probe = KeywordPresenceProbe(required_keywords=["Paris"])
@@ -223,7 +228,9 @@ class TestKeywordPresenceProbe:
 
     def test_required_keyword_missing(self) -> None:
         probe = KeywordPresenceProbe(required_keywords=["Paris"])
-        r = probe.evaluate(make_prompt(), make_response("The capital of France is a beautiful city."))
+        r = probe.evaluate(
+            make_prompt(), make_response("The capital of France is a beautiful city.")
+        )
         assert not r.passed
 
     def test_forbidden_keyword_present(self) -> None:
@@ -254,6 +261,7 @@ class TestKeywordPresenceProbe:
 
 
 # ─── ExpectedKeywordsProbe ───────────────────────────────────────────────────
+
 
 class TestExpectedKeywordsProbe:
     probe = ExpectedKeywordsProbe()

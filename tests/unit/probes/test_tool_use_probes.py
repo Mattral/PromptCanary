@@ -22,8 +22,8 @@ from promptcanary.core.probes.tool_use import (
     ToolCallSchemaProbe,
 )
 
-
 # ─── Helpers ─────────────────────────────────────────────────────────────────
+
 
 def make_prompt(pid: str = "p1") -> CanaryPrompt:
     return CanaryPrompt(id=pid, text="Test prompt")
@@ -35,36 +35,36 @@ def make_response(content: str, pid: str = "p1") -> LLMResponse:
 
 # ── Shared fixtures ───────────────────────────────────────────────────────────
 
-OPENAI_TOOL_CALL = json.dumps({
-    "tool_calls": [{
-        "function": {
-            "name": "search_web",
-            "arguments": json.dumps({"query": "Paris weather", "limit": 5})
-        }
-    }]
-})
+OPENAI_TOOL_CALL = json.dumps(
+    {
+        "tool_calls": [
+            {
+                "function": {
+                    "name": "search_web",
+                    "arguments": json.dumps({"query": "Paris weather", "limit": 5}),
+                }
+            }
+        ]
+    }
+)
 
-SIMPLE_JSON_CALL = json.dumps({
-    "function": "search_web",
-    "args": {"query": "Paris weather", "limit": 5}
-})
+SIMPLE_JSON_CALL = json.dumps(
+    {"function": "search_web", "args": {"query": "Paris weather", "limit": 5}}
+)
 
-ANTHROPIC_STYLE_CALL = json.dumps({
-    "name": "search_web",
-    "input": {"query": "Paris weather", "limit": 5}
-})
+ANTHROPIC_STYLE_CALL = json.dumps(
+    {"name": "search_web", "input": {"query": "Paris weather", "limit": 5}}
+)
 
 NO_TOOL_CALL = "I'll look that up for you right away."
 
-WRONG_FUNCTION = json.dumps({
-    "function": "get_weather",
-    "args": {"city": "Paris"}
-})
+WRONG_FUNCTION = json.dumps({"function": "get_weather", "args": {"city": "Paris"}})
 
 
 # ─────────────────────────────────────────────────────────────────────────────
 # ToolCallPresenceProbe
 # ─────────────────────────────────────────────────────────────────────────────
+
 
 class TestToolCallPresenceProbe:
     def test_detects_openai_tool_call_format(self) -> None:
@@ -128,6 +128,7 @@ class TestToolCallPresenceProbe:
 # ToolCallNameProbe
 # ─────────────────────────────────────────────────────────────────────────────
 
+
 class TestToolCallNameProbe:
     def test_correct_function_name_passes(self) -> None:
         probe = ToolCallNameProbe("search_web")
@@ -185,6 +186,7 @@ class TestToolCallNameProbe:
 # ToolCallArgsProbe
 # ─────────────────────────────────────────────────────────────────────────────
 
+
 class TestToolCallArgsProbe:
     def test_all_required_args_present(self) -> None:
         probe = ToolCallArgsProbe(required_args=["query", "limit"])
@@ -210,10 +212,9 @@ class TestToolCallArgsProbe:
             required_args=["query"],
             forbidden_args=["api_key"],
         )
-        content = json.dumps({
-            "function": "search",
-            "args": {"query": "Paris", "api_key": "secret"}
-        })
+        content = json.dumps(
+            {"function": "search", "args": {"query": "Paris", "api_key": "secret"}}
+        )
         r = probe(make_prompt(), make_response(content))
         assert not r.passed
         assert "api_key" in r.metadata["forbidden_found"]
@@ -244,66 +245,82 @@ class TestToolCallArgsProbe:
 # ToolCallSchemaProbe
 # ─────────────────────────────────────────────────────────────────────────────
 
+
 class TestToolCallSchemaProbe:
     def test_full_valid_schema_passes(self) -> None:
-        probe = ToolCallSchemaProbe(schema={
-            "name": "search_web",
-            "required_args": ["query", "limit"],
-            "arg_types": {"query": str, "limit": int},
-        })
+        probe = ToolCallSchemaProbe(
+            schema={
+                "name": "search_web",
+                "required_args": ["query", "limit"],
+                "arg_types": {"query": str, "limit": int},
+            }
+        )
         r = probe(make_prompt(), make_response(SIMPLE_JSON_CALL))
         assert r.passed
         assert r.score >= 0.85
 
     def test_wrong_name_fails(self) -> None:
-        probe = ToolCallSchemaProbe(schema={
-            "name": "get_weather",
-            "required_args": ["query"],
-        })
+        probe = ToolCallSchemaProbe(
+            schema={
+                "name": "get_weather",
+                "required_args": ["query"],
+            }
+        )
         r = probe(make_prompt(), make_response(SIMPLE_JSON_CALL))
         # Name mismatch should pull score below 0.85
         assert not r.passed
 
     def test_missing_arg_reduces_score(self) -> None:
-        probe = ToolCallSchemaProbe(schema={
-            "name": "search_web",
-            "required_args": ["query", "limit", "language"],
-        })
+        probe = ToolCallSchemaProbe(
+            schema={
+                "name": "search_web",
+                "required_args": ["query", "limit", "language"],
+            }
+        )
         r = probe(make_prompt(), make_response(SIMPLE_JSON_CALL))
         assert r.score < 1.0
 
     def test_wrong_arg_type_reduces_score(self) -> None:
-        content = json.dumps({
-            "function": "search_web",
-            "args": {"query": 123, "limit": "five"}  # types swapped
-        })
-        probe = ToolCallSchemaProbe(schema={
-            "name": "search_web",
-            "required_args": ["query", "limit"],
-            "arg_types": {"query": str, "limit": int},
-        })
+        content = json.dumps(
+            {
+                "function": "search_web",
+                "args": {"query": 123, "limit": "five"},  # types swapped
+            }
+        )
+        probe = ToolCallSchemaProbe(
+            schema={
+                "name": "search_web",
+                "required_args": ["query", "limit"],
+                "arg_types": {"query": str, "limit": int},
+            }
+        )
         r = probe(make_prompt(), make_response(content))
         # Type errors should reduce overall score
         assert r.score < probe._make_result("p1", passed=True, score=1.0).score or r.score <= 1.0
 
     def test_no_name_constraint_gives_credit(self) -> None:
-        probe = ToolCallSchemaProbe(schema={
-            "required_args": ["query"],
-        })
+        probe = ToolCallSchemaProbe(
+            schema={
+                "required_args": ["query"],
+            }
+        )
         r = probe(make_prompt(), make_response(SIMPLE_JSON_CALL))
         assert r.passed
 
     def test_metadata_contains_component_scores(self) -> None:
-        probe = ToolCallSchemaProbe(schema={
-            "name": "search_web",
-            "required_args": ["query"],
-        })
+        probe = ToolCallSchemaProbe(
+            schema={
+                "name": "search_web",
+                "required_args": ["query"],
+            }
+        )
         r = probe(make_prompt(), make_response(SIMPLE_JSON_CALL))
         assert "component_scores" in r.metadata
         assert "args" in r.metadata["component_scores"]
 
     def test_probe_id_registered(self) -> None:
         from promptcanary.core.probes.base import get_probe_registry
+
         registry = get_probe_registry()
         assert "tool_call_presence" in registry
         assert "tool_call_name" in registry
