@@ -18,6 +18,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.2.2] — 2026-07-04
+
+### Fixed
+
+**Another CI-only mypy failure, caught the same way as v0.2.1's fixes: by installing strictly from `pyproject.toml` into a fresh virtualenv rather than trusting an accumulated local dev environment**
+
+- `promptcanary/core/suite.py:190` — `mypy` reported `Returning Any from function declared to return "str"` on `CanarySuite.to_yaml_template()`'s call to `yaml.dump(...)`. Root cause: `types-PyYAML` was present in the local development environment from earlier ad hoc installs but was never declared in `pyproject.toml`'s `[dev]` extras, so a clean `pip install -e ".[dev]"` (exactly what CI runs) left `yaml.dump()` untyped (`Any`), which mypy strict mode correctly flagged against the function's declared `-> str` return type. Fixed by adding `types-PyYAML` to `[dev]`.
+- `pyproject.toml` `[project.optional-dependencies.viz]` — removed `pandas`, which was declared but never actually imported or used anywhere in the codebase (only mentioned in a docstring). Its sole effect was pulling in `numpy` as a transitive dependency; `numpy` 2.5 ships type stubs using unconditional Python 3.12-only syntax (PEP 695 `type X = ...` statements), which fails to parse under this project's deliberate `python_version = "3.10"` mypy target — a hard stub-parse error that `ignore_missing_imports`, per-module `ignore_errors`, and `follow_imports = "skip"` overrides all failed to work around, since `pandas`'s own stubs import `numpy` internally regardless of override targeting. Removing the unused dependency fixes the root cause rather than working around the symptom. See `DECISION_LOG.md` ADR-011 for the full investigation and rejected alternatives.
+
+### Process
+
+- Established clean-room verification as standard practice before any release: install *only* what `pyproject.toml` declares into a fresh, empty virtualenv (never trust a long-lived local dev environment that has accumulated packages from earlier work) and run the full `ruff check` → `ruff format --check` → `mypy` → `pytest` loop, for every meaningful combination of optional extras (`[dev]` alone, matching CI exactly; `[dev,viz]` together, matching a full local contributor setup). Both this fix and v0.2.1's `hypothesis`/`typer[all]` fixes were found by this exact process — documented here so it isn't lost as tribal knowledge.
+
+---
+
 ## [0.2.1] — 2026-07-03
 
 ### Fixed
@@ -221,7 +236,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-[Unreleased]: https://github.com/promptcanary/promptcanary/compare/v0.2.1...HEAD
+[Unreleased]: https://github.com/promptcanary/promptcanary/compare/v0.2.2...HEAD
+[0.2.2]: https://github.com/promptcanary/promptcanary/compare/v0.2.1...v0.2.2
 [0.2.1]: https://github.com/promptcanary/promptcanary/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/promptcanary/promptcanary/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/promptcanary/promptcanary/releases/tag/v0.1.0
