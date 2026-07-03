@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "promptcanary"
-version = "0.2.1"
+version = "0.2.2"
 description = "Detect silent behavioral drift in LLM providers and custom models — before it breaks production."
 readme = "README.md"
 license = { file = "LICENSE" }
@@ -43,7 +43,6 @@ dependencies = [
 [project.optional-dependencies]
 viz = [
     "plotly>=5.18.0",
-    "pandas>=2.1.0",
 ]
 dev = [
     "pytest>=7.4.0",
@@ -55,6 +54,7 @@ dev = [
     "mypy>=1.8.0",
     "httpx>=0.27.0",
     "types-python-dateutil",
+    "types-PyYAML",
 ]
 all = [
     "promptcanary[viz,dev]",
