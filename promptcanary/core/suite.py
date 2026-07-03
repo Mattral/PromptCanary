@@ -24,6 +24,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 import yaml
+from rich.progress import TaskID
 
 from promptcanary.core.models import (
     CanaryPrompt,
@@ -86,7 +87,7 @@ class CanarySuite:
     # ── Construction helpers ─────────────────────────────────────────────────
 
     @classmethod
-    def from_yaml(cls, path: str | Path) -> "CanarySuite":
+    def from_yaml(cls, path: str | Path) -> CanarySuite:
         """Load a CanarySuite from a YAML configuration file.
 
         Expected YAML structure::
@@ -120,7 +121,7 @@ class CanarySuite:
         return cls._from_dict(config)
 
     @classmethod
-    def _from_dict(cls, config: dict[str, Any]) -> "CanarySuite":
+    def _from_dict(cls, config: dict[str, Any]) -> CanarySuite:
         """Build a CanarySuite from a parsed dict (internal)."""
         from promptcanary.core.probes.base import get_probe
 
@@ -176,9 +177,7 @@ class CanarySuite:
             "name": self.name,
             "description": self.description or "",
             "tags": self.tags,
-            "probes": [
-                {"type": p.probe_id} for p in self.probes
-            ],
+            "probes": [{"type": p.probe_id} for p in self.probes],
             "prompts": [
                 {
                     "text": cp.text,
@@ -194,7 +193,7 @@ class CanarySuite:
 
     def run(
         self,
-        provider: "BaseLLMProvider",
+        provider: BaseLLMProvider,
         *,
         temperature: float | None = None,
         max_tokens: int | None = None,
@@ -246,11 +245,10 @@ class CanarySuite:
         )
 
         with progress_ctx as progress:
-            if show_progress:
-                task = progress.add_task(
-                    f"[cyan]Running {total} prompt(s) × {len(self.probes)} probe(s)…",
-                    total=total,
-                )
+            task = progress.add_task(
+                f"[cyan]Running {total} prompt(s) x {len(self.probes)} probe(s)…",
+                total=total,
+            )
 
             for i, prompt in enumerate(self.prompts, 1):
                 # ── Call provider ─────────────────────────────────────────────
@@ -272,9 +270,10 @@ class CanarySuite:
                 for probe in self.probes:
                     try:
                         probe_result = probe.evaluate(prompt, llm_response)
-                    except Exception as exc:  # noqa: BLE001
+                    except Exception as exc:
                         # Probe errors become scored failures, never crashes
                         from promptcanary.core.models import ProbeResult
+
                         probe_result = ProbeResult(
                             probe_id=probe.probe_id,
                             probe_name=probe.name,
@@ -286,8 +285,7 @@ class CanarySuite:
                         )
                     all_probe_results.append(probe_result)
 
-                if show_progress:
-                    progress.update(task, advance=1, description=f"[cyan]Prompt {i}/{total}…")
+                progress.update(task, advance=1, description=f"[cyan]Prompt {i}/{total}…")
 
         # Populate result (Pydantic frozen workaround: reassign)
         result.probe_results.extend(all_probe_results)
@@ -307,10 +305,22 @@ class CanarySuite:
 
 
 class _NoopContext:
-    """Context manager no-op for when progress display is disabled."""
+    """Context manager no-op for when progress display is disabled.
 
-    def __enter__(self) -> "_NoopContext":
+    Mirrors the subset of Rich's ``Progress`` API used by ``CanarySuite.run()``
+    (``add_task`` / ``update``) as no-ops, so the caller can use the same
+    code path regardless of whether progress display is enabled — no
+    ``if show_progress:`` branching needed around each call.
+    """
+
+    def __enter__(self) -> _NoopContext:
         return self
 
     def __exit__(self, *_: object) -> None:
+        pass
+
+    def add_task(self, *_args: object, **_kwargs: object) -> TaskID:
+        return TaskID(-1)
+
+    def update(self, *_args: object, **_kwargs: object) -> None:
         pass

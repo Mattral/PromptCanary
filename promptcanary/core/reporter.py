@@ -29,9 +29,7 @@ Usage::
 from __future__ import annotations
 
 import json
-from datetime import timezone
 from pathlib import Path
-from typing import Any
 
 from rich import box
 from rich.console import Console
@@ -46,7 +44,6 @@ from promptcanary.core.models import (
     DriftSeverity,
     ProbeCategory,
 )
-
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Colour helpers
@@ -187,9 +184,7 @@ class Reporter:
         if r.pass_rate == 1.0:
             lines.append("✅ **All probes passed.** No drift detected in this run.")
         else:
-            lines.append(
-                f"⚠️ **{len(r.failed_probes)} probe(s) failed.** Review the table below."
-            )
+            lines.append(f"⚠️ **{len(r.failed_probes)} probe(s) failed.** Review the table below.")
 
         # Stats table
         by_cat = r.by_category
@@ -203,9 +198,7 @@ class Reporter:
         for cat, results in sorted(by_cat.items(), key=lambda x: x[0].value):
             passed = sum(1 for rr in results if rr.passed)
             avg_score = sum(rr.score for rr in results) / len(results)
-            lines.append(
-                f"| {cat.value} | {len(results)} | {passed} | {avg_score:.1%} |"
-            )
+            lines.append(f"| {cat.value} | {len(results)} | {passed} | {avg_score:.1%} |")
 
         # Detailed table
         lines += [
@@ -290,8 +283,10 @@ class DriftReporter:
 
         if dr.has_drift:
             console.print(f"\n[red bold]⚠️  DRIFT DETECTED — {dr.severity.value.upper()}[/red bold]")
-            console.print(f"   Score: {dr.overall_baseline_score:.1%} → {dr.overall_current_score:.1%} "
-                          f"({dr.overall_score_delta:+.1%})")
+            console.print(
+                f"   Score: {dr.overall_baseline_score:.1%} → {dr.overall_current_score:.1%} "
+                f"({dr.overall_score_delta:+.1%})"
+            )
 
             # Regressions table
             table = Table(
@@ -358,8 +353,8 @@ class DriftReporter:
             "",
             dr.summary,
             "",
-            f"| Metric | Value |",
-            f"|--------|-------|",
+            "| Metric | Value |",
+            "|--------|-------|",
             f"| Baseline score | {dr.overall_baseline_score:.1%} |",
             f"| Current score | {dr.overall_current_score:.1%} |",
             f"| Score delta | {dr.overall_score_delta:+.1%} |",
@@ -487,7 +482,11 @@ def _build_run_html(r: CanaryRunResult) -> str:
     rows = ""
     for pr in r.probe_results:
         cls = _score_css_class(pr.score)
-        badge = '<span class="badge bg-green">PASS</span>' if pr.passed else '<span class="badge bg-red">FAIL</span>'
+        badge = (
+            '<span class="badge bg-green">PASS</span>'
+            if pr.passed
+            else '<span class="badge bg-red">FAIL</span>'
+        )
         bar_w = int(pr.score * 100)
         rows += (
             f"<tr><td><b>{pr.probe_name}</b></td>"
@@ -528,8 +527,10 @@ style="color:var(--blue)">PromptCanary</a></p>
 
 def _build_drift_html(dr: DriftReport) -> str:
     sev_colour = {
-        DriftSeverity.NONE: "green", DriftSeverity.LOW: "yellow",
-        DriftSeverity.MEDIUM: "orange", DriftSeverity.HIGH: "red",
+        DriftSeverity.NONE: "green",
+        DriftSeverity.LOW: "yellow",
+        DriftSeverity.MEDIUM: "orange",
+        DriftSeverity.HIGH: "red",
         DriftSeverity.CRITICAL: "red",
     }.get(dr.severity, "yellow")
 
@@ -558,7 +559,7 @@ def _build_drift_html(dr: DriftReport) -> str:
   <b>Provider:</b> <code>{dr.provider.model_id}</code> &nbsp;|&nbsp;
   <b>Severity:</b> <span class="{sev_colour}"><b>{dr.severity.value.upper()}</b></span><br/>
   <b>Score:</b> {dr.overall_baseline_score:.1%} → {dr.overall_current_score:.1%}
-  (<span class="{'red' if dr.overall_score_delta < 0 else 'green'}">{dr.overall_score_delta:+.1%}</span>)
+  (<span class="{"red" if dr.overall_score_delta < 0 else "green"}">{dr.overall_score_delta:+.1%}</span>)
   &nbsp;|&nbsp; Regressions: <span class="red"><b>{len(dr.regressions)}</b></span>
   &nbsp;|&nbsp; Improvements: <span class="green"><b>{len(dr.improvements)}</b></span>
 </div>
