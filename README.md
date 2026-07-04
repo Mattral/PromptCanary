@@ -2,7 +2,6 @@
 
 **Detect silent behavioral drift in LLM providers — before it breaks production.**
 
-
 <p align="center">
   <a href="https://github.com/Mattral/PromptCanary/actions/workflows/ci.yml">
     <img alt="CI" src="https://img.shields.io/github/actions/workflow/status/Mattral/PromptCanary/ci.yml?style=for-the-badge&logo=github&label=CI">
@@ -30,7 +29,6 @@
     <img src="https://img.shields.io/badge/Open_in_Colab-Notebooks-7C3AED?style=for-the-badge&logo=googlecolab&logoColor=white" alt="Open Notebooks in Colab">
   </a>
 </p>
-
 </p>
 
 ---
