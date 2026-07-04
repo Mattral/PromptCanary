@@ -75,6 +75,6 @@ plot_drift_timeline(reports, output_path="drift_timeline.html")
 
 ## Full Walkthrough
 
-See [`notebooks/analyzing_drift_trends.ipynb`](https://github.com/promptcanary/promptcanary/blob/main/notebooks/analyzing_drift_trends.ipynb)
+See [`notebooks/analyzing_drift_trends.ipynb`](https://github.com/Mattral/PromptCanary/blob/main/notebooks/analyzing_drift_trends.ipynb)
 for a complete, runnable example that simulates seven days of gradual
 provider drift and identifies the first-failing probe at each stage.

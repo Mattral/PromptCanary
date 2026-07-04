@@ -225,7 +225,7 @@ def run_demo(real_provider: str | None = None) -> None:
             "  3. Run: [cyan]promptcanary run --provider openai/gpt-5.4 --save-baseline[/cyan]\n"
             "  4. Add [cyan].github/workflows/promptcanary.yml[/cyan] to your repo\n"
             "  5. Get notified when your provider silently drifts 🐦\n\n"
-            "  [dim]Docs: https://github.com/promptcanary/promptcanary[/dim]",
+            "  [dim]Docs: https://github.com/Mattral/PromptCanary[/dim]",
             title="[bold blue]🐦 You're ready![/bold blue]",
             border_style="green",
         ))

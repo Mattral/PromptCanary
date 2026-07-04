@@ -112,7 +112,7 @@ def test_my_probe():
     assert result.score >= 0.8
 ```
 
-See [`tests/unit/probes/`](https://github.com/promptcanary/promptcanary/tree/main/tests/unit/probes)
+See [`tests/unit/probes/`](https://github.com/Mattral/PromptCanary/tree/main/tests/unit/probes)
 in the repository for extensive real examples of this pattern.
 
 ## Contributing Your Probe Upstream

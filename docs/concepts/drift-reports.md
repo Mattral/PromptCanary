@@ -45,7 +45,7 @@ Severity is derived from regression rate and worst-case delta:
 | `CRITICAL` | Regression rate ≥ 50% or worst delta ≥ 0.6. |
 
 This heuristic is intentionally simple and transparent — see
-[`promptcanary/core/models.py`](https://github.com/promptcanary/promptcanary/blob/main/promptcanary/core/models.py)
+[`promptcanary/core/models.py`](https://github.com/Mattral/PromptCanary/blob/main/promptcanary/core/models.py)
 for the exact implementation, and the [Decision Log](../decision-log.md)
 for the rationale.
 
