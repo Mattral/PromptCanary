@@ -19,7 +19,7 @@ Quick start::
     result = suite.run(provider)
     print(result.overall_score)
 
-See https://github.com/promptcanary/promptcanary for full documentation.
+See https://github.com/Mattral/PromptCanary for full documentation.
 """
 
 from promptcanary.core.comparator import compare
