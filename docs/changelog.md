@@ -41,6 +41,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Established clean-room verification as standard practice before any release: install *only* what `pyproject.toml` declares into a fresh, empty virtualenv (never trust a long-lived local dev environment that has accumulated packages from earlier work) and run the full `ruff check` → `ruff format --check` → `mypy` → `pytest` loop, for every meaningful combination of optional extras (`[dev]` alone, matching CI exactly; `[dev,viz]` together, matching a full local contributor setup). Both this fix and v0.2.1's `hypothesis`/`typer[all]` fixes were found by this exact process — documented here so it isn't lost as tribal knowledge.
 
+### Changed
+
+- **Fixed placeholder GitHub org throughout the project.** Every badge, URL, and cross-reference previously pointed to a placeholder `promptcanary/promptcanary` org (32 occurrences across `README.md`, `CONTRIBUTING.md`, `CHANGELOG.md`, `pyproject.toml`, `mkdocs.yml`, CI/issue templates, docstrings, and non-mirrored docs pages) — corrected to the real repository, `Mattral/PromptCanary`.
+- **Fixed a related inconsistency**: the `Documentation` URL in `pyproject.toml` and `site_url` in `mkdocs.yml` pointed to a ReadTheDocs domain that was never set up — the actual deployment target (per `.github/workflows/docs.yml`'s `mkdocs gh-deploy`) is GitHub Pages. Both now correctly point to `https://mattral.github.io/PromptCanary/`.
+- `README.md` badge row replaced with a fuller set (CI, PyPI, Python version, License, Ruff, mypy, a Hits view counter, and a Colab notebooks launch badge), all pointing to the real repo.
+- `notebooks/README.md` added — direct "Open in Colab" launch links for all four notebooks (`quickstart`, `custom_probes`, `analyzing_drift_trends`, `ci_integration`), so notebooks are runnable with zero local setup.
+
 ---
 
 ## [0.2.1] — 2026-07-03
@@ -246,8 +253,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-[Unreleased]: https://github.com/promptcanary/promptcanary/compare/v0.2.2...HEAD
-[0.2.2]: https://github.com/promptcanary/promptcanary/compare/v0.2.1...v0.2.2
-[0.2.1]: https://github.com/promptcanary/promptcanary/compare/v0.2.0...v0.2.1
-[0.2.0]: https://github.com/promptcanary/promptcanary/compare/v0.1.0...v0.2.0
-[0.1.0]: https://github.com/promptcanary/promptcanary/releases/tag/v0.1.0
+[Unreleased]: https://github.com/Mattral/PromptCanary/compare/v0.2.2...HEAD
+[0.2.2]: https://github.com/Mattral/PromptCanary/compare/v0.2.1...v0.2.2
+[0.2.1]: https://github.com/Mattral/PromptCanary/compare/v0.2.0...v0.2.1
+[0.2.0]: https://github.com/Mattral/PromptCanary/compare/v0.1.0...v0.2.0
+[0.1.0]: https://github.com/Mattral/PromptCanary/releases/tag/v0.1.0
