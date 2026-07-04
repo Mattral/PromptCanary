@@ -154,7 +154,7 @@ promptcanary compare --baseline baselines/latest.json --current results.json
 
 ## Adding to CI
 
-See [PromptCanary docs](https://github.com/promptcanary/promptcanary) for GitHub Action setup.
+See [PromptCanary docs](https://github.com/Mattral/PromptCanary) for GitHub Action setup.
 """
     (suite_dir / "README.md").write_text(readme, encoding="utf-8")
 

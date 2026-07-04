@@ -70,11 +70,11 @@ docs = [
 promptcanary = "promptcanary.cli:app"
 
 [project.urls]
-Homepage = "https://github.com/promptcanary/promptcanary"
-Documentation = "https://promptcanary.readthedocs.io"
-Repository = "https://github.com/promptcanary/promptcanary"
-"Bug Tracker" = "https://github.com/promptcanary/promptcanary/issues"
-Changelog = "https://github.com/promptcanary/promptcanary/blob/main/CHANGELOG.md"
+Homepage = "https://github.com/Mattral/PromptCanary"
+Documentation = "https://mattral.github.io/PromptCanary/"
+Repository = "https://github.com/Mattral/PromptCanary"
+"Bug Tracker" = "https://github.com/Mattral/PromptCanary/issues"
+Changelog = "https://github.com/Mattral/PromptCanary/blob/main/CHANGELOG.md"
 
 [tool.hatch.build.targets.wheel]
 packages = ["promptcanary"]
