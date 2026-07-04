@@ -108,4 +108,4 @@ promptcanary run --provider openai/gpt-5.4 \
 - [Your First Canary Suite](first-suite.md) — a deeper walkthrough of writing good prompts and probes
 - [Probe Reference](../probes/index.md) — all 19 built-in probes
 - [GitHub Actions](../ci-cd/github-actions.md) — automate this on a schedule
-- Try [`notebooks/quickstart.ipynb`](https://github.com/promptcanary/promptcanary/blob/main/notebooks/quickstart.ipynb) for an interactive walkthrough
+- Try [`notebooks/quickstart.ipynb`](https://github.com/Mattral/PromptCanary/blob/main/notebooks/quickstart.ipynb) for an interactive walkthrough

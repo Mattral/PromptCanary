@@ -88,5 +88,5 @@ print(drift.summary)
 ---
 
 *PromptCanary is MIT-licensed and built for AI engineers who care about
-production reliability. [View on GitHub](https://github.com/promptcanary/promptcanary) ·
+production reliability. [View on GitHub](https://github.com/Mattral/PromptCanary) ·
 [View on PyPI](https://pypi.org/project/promptcanary/)*
