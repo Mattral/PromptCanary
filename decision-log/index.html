@@ -1,0 +1,3982 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Detect silent behavioral drift in LLM providers — before it breaks production.">
+      
+      
+      
+        <link rel="canonical" href="https://mattral.github.io/PromptCanary/decision-log/">
+      
+      
+        <link rel="prev" href="../api-reference/">
+      
+      
+        <link rel="next" href="../contributing/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/favicon.svg">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>Decision Log - PromptCanary</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#decision-log-promptcanary" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="PromptCanary" class="md-header__button md-logo" aria-label="PromptCanary" data-md-component="logo">
+      
+  <img src="../assets/logo.svg" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            PromptCanary
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Decision Log
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/Mattral/PromptCanary" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Mattral/PromptCanary
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href=".." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../getting-started/installation/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Getting Started
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../concepts/overview/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Core Concepts
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../probes/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Probe Reference
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../providers/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Providers
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../ci-cd/github-actions/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Running in CI/CD
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../integrations/langchain/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Integration Guides
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../visualization/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Visualization
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../cli-reference/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  CLI Reference
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../api-reference/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  API Reference
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    <li class="md-tabs__item md-tabs__item--active">
+      <a href="./" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Architecture Decision Records
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../contributing/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Contributing
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../code-of-conduct/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Code of Conduct
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../changelog/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Changelog
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="PromptCanary" class="md-nav__button md-logo" aria-label="PromptCanary" data-md-component="logo">
+      
+  <img src="../assets/logo.svg" alt="logo">
+
+    </a>
+    PromptCanary
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/Mattral/PromptCanary" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Mattral/PromptCanary
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Getting Started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting-started/installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting-started/quickstart/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quick Start
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting-started/first-suite/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Your First Canary Suite
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Core Concepts
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Core Concepts
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../concepts/overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../concepts/canary-suite/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CanarySuite
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../concepts/probes/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Probes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../concepts/baselines/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Baselines & Comparison
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../concepts/drift-reports/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Drift Reports
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../probes/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Probe Reference
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_4" id="__nav_4_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Probe Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../probes/format/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Format & Structure
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../probes/reasoning/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reasoning Style
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../probes/safety/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Safety & Refusal
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../probes/tool-use/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tool Use
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../probes/factual/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Factual
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../probes/custom/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Writing Custom Probes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../providers/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Providers
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_5" id="__nav_5_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Providers
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../providers/openai/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    OpenAI
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../providers/anthropic/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Anthropic
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../providers/gemini/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Google Gemini
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../providers/ollama/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Local Models (Ollama)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Running in CI/CD
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Running in CI/CD
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ci-cd/github-actions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    GitHub Actions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ci-cd/multi-provider/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Multi-Provider Matrix
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ci-cd/baseline-promotion/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Baseline Promotion
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Integration Guides
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Integration Guides
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../integrations/langchain/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    LangChain
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../integrations/llamaindex/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    LlamaIndex
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../integrations/fastapi/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FastAPI Apps
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../visualization/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Visualization
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cli-reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CLI Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api-reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture Decision Records
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture Decision Records
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#adr-001-use-litellm-as-the-provider-abstraction-layer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ADR-001: Use LiteLLM as the Provider Abstraction Layer
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="ADR-001: Use LiteLLM as the Provider Abstraction Layer">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#context" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Context
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#options-considered" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Options Considered
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#decision" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Decision
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rationale" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rationale
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#consequences" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Consequences
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#adr-002-pydantic-v2-for-all-data-models" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ADR-002: Pydantic v2 for All Data Models
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="ADR-002: Pydantic v2 for All Data Models">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#context_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Context
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#options-considered_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Options Considered
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#decision_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Decision
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rationale_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rationale
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#consequences_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Consequences
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#adr-003-sequential-provider-calls-not-async-parallel" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ADR-003: Sequential Provider Calls (Not Async-Parallel)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="ADR-003: Sequential Provider Calls (Not Async-Parallel)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#context_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Context
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#options-considered_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Options Considered
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#decision_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Decision
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rationale_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rationale
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#consequences_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Consequences
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#adr-004-local-json-file-storage-for-baselines-mvp" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ADR-004: Local JSON File Storage for Baselines (MVP)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="ADR-004: Local JSON File Storage for Baselines (MVP)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#context_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Context
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#options-considered_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Options Considered
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#decision_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Decision
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rationale_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rationale
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#consequences_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Consequences
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#adr-005-rich-typer-for-cli" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ADR-005: Rich + Typer for CLI
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="ADR-005: Rich + Typer for CLI">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#options-considered_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Options Considered
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#decision_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Decision
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rationale_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rationale
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#consequences_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Consequences
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#adr-006-score-range-0010-with-passed-boolean" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ADR-006: Score Range 0.0–1.0 with passed Boolean
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="ADR-006: Score Range 0.0–1.0 with passed Boolean">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#context_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Context
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#decision_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Decision
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rationale_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rationale
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#consequences_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Consequences
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#adr-007-probe-registration-via-metaclass-free-auto-registry" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ADR-007: Probe Registration via Metaclass-Free Auto-Registry
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="ADR-007: Probe Registration via Metaclass-Free Auto-Registry">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#context_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Context
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#options-considered_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Options Considered
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#decision_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Decision
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rationale_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rationale
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#consequences_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Consequences
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#adr-008-no-llm-calls-in-the-test-suite" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ADR-008: No LLM Calls in the Test Suite
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="ADR-008: No LLM Calls in the Test Suite">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#context_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Context
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#decision_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Decision
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rationale_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rationale
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#consequences_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Consequences
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#adr-009-visualization-degrades-gracefully-ascii-first-plotly-optional" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ADR-009: Visualization Degrades Gracefully — ASCII First, Plotly Optional
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="ADR-009: Visualization Degrades Gracefully — ASCII First, Plotly Optional">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#context_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Context
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#options-considered_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Options Considered
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#decision_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Decision
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rationale_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rationale
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#consequences_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Consequences
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#adr-011-viz-extra-does-not-include-pandas" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ADR-011: [viz] Extra Does Not Include pandas
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="ADR-011: [viz] Extra Does Not Include pandas">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#context_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Context
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-problem-this-caused" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The problem this caused
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#options-considered_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Options Considered
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#decision_9" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Decision
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rationale_9" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rationale
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#consequences_9" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Consequences
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#adr-010-tool-use-probes-parse-multiple-provider-formats-natively" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ADR-010: Tool-Use Probes Parse Multiple Provider Formats Natively
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="ADR-010: Tool-Use Probes Parse Multiple Provider Formats Natively">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#context_9" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Context
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#options-considered_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Options Considered
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#decision_10" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Decision
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rationale_10" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rationale
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#consequences_10" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Consequences
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../contributing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contributing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../code-of-conduct/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Code of Conduct
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../changelog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Changelog
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#adr-001-use-litellm-as-the-provider-abstraction-layer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ADR-001: Use LiteLLM as the Provider Abstraction Layer
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="ADR-001: Use LiteLLM as the Provider Abstraction Layer">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#context" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Context
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#options-considered" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Options Considered
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#decision" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Decision
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rationale" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rationale
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#consequences" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Consequences
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#adr-002-pydantic-v2-for-all-data-models" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ADR-002: Pydantic v2 for All Data Models
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="ADR-002: Pydantic v2 for All Data Models">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#context_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Context
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#options-considered_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Options Considered
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#decision_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Decision
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rationale_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rationale
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#consequences_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Consequences
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#adr-003-sequential-provider-calls-not-async-parallel" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ADR-003: Sequential Provider Calls (Not Async-Parallel)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="ADR-003: Sequential Provider Calls (Not Async-Parallel)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#context_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Context
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#options-considered_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Options Considered
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#decision_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Decision
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rationale_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rationale
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#consequences_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Consequences
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#adr-004-local-json-file-storage-for-baselines-mvp" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ADR-004: Local JSON File Storage for Baselines (MVP)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="ADR-004: Local JSON File Storage for Baselines (MVP)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#context_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Context
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#options-considered_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Options Considered
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#decision_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Decision
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rationale_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rationale
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#consequences_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Consequences
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#adr-005-rich-typer-for-cli" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ADR-005: Rich + Typer for CLI
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="ADR-005: Rich + Typer for CLI">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#options-considered_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Options Considered
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#decision_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Decision
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rationale_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rationale
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#consequences_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Consequences
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#adr-006-score-range-0010-with-passed-boolean" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ADR-006: Score Range 0.0–1.0 with passed Boolean
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="ADR-006: Score Range 0.0–1.0 with passed Boolean">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#context_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Context
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#decision_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Decision
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rationale_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rationale
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#consequences_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Consequences
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#adr-007-probe-registration-via-metaclass-free-auto-registry" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ADR-007: Probe Registration via Metaclass-Free Auto-Registry
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="ADR-007: Probe Registration via Metaclass-Free Auto-Registry">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#context_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Context
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#options-considered_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Options Considered
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#decision_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Decision
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rationale_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rationale
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#consequences_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Consequences
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#adr-008-no-llm-calls-in-the-test-suite" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ADR-008: No LLM Calls in the Test Suite
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="ADR-008: No LLM Calls in the Test Suite">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#context_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Context
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#decision_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Decision
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rationale_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rationale
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#consequences_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Consequences
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#adr-009-visualization-degrades-gracefully-ascii-first-plotly-optional" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ADR-009: Visualization Degrades Gracefully — ASCII First, Plotly Optional
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="ADR-009: Visualization Degrades Gracefully — ASCII First, Plotly Optional">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#context_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Context
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#options-considered_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Options Considered
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#decision_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Decision
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rationale_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rationale
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#consequences_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Consequences
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#adr-011-viz-extra-does-not-include-pandas" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ADR-011: [viz] Extra Does Not Include pandas
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="ADR-011: [viz] Extra Does Not Include pandas">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#context_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Context
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-problem-this-caused" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The problem this caused
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#options-considered_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Options Considered
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#decision_9" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Decision
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rationale_9" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rationale
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#consequences_9" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Consequences
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#adr-010-tool-use-probes-parse-multiple-provider-formats-natively" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        ADR-010: Tool-Use Probes Parse Multiple Provider Formats Natively
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="ADR-010: Tool-Use Probes Parse Multiple Provider Formats Natively">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#context_9" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Context
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#options-considered_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Options Considered
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#decision_10" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Decision
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#rationale_10" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rationale
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#consequences_10" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Consequences
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<!--
+  This page mirrors the repository root DECISION_LOG.md.
+  Source of truth: /DECISION_LOG.md -- edit there, not here.
+  Regenerate with: python docs/sync_root_docs.py
+-->
+
+<h1 id="decision-log-promptcanary">Decision Log — PromptCanary<a class="headerlink" href="#decision-log-promptcanary" title="Permanent link">&para;</a></h1>
+<p>Architecture Decision Records (ADRs) for PromptCanary v0.1.</p>
+<p>Each record documents a significant design decision, the alternatives considered,
+and the rationale. This is a living document — update it when decisions change.</p>
+<hr />
+<h2 id="adr-001-use-litellm-as-the-provider-abstraction-layer">ADR-001: Use LiteLLM as the Provider Abstraction Layer<a class="headerlink" href="#adr-001-use-litellm-as-the-provider-abstraction-layer" title="Permanent link">&para;</a></h2>
+<p><strong>Date</strong>: 2026-06-29
+<strong>Status</strong>: Accepted
+<strong>Deciders</strong>: Core team</p>
+<h3 id="context">Context<a class="headerlink" href="#context" title="Permanent link">&para;</a></h3>
+<p>PromptCanary needs to support many LLM providers (OpenAI, Anthropic, Google, local models).
+We needed to decide whether to write provider-specific adapters or use an abstraction library.</p>
+<h3 id="options-considered">Options Considered<a class="headerlink" href="#options-considered" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>Write individual adapters</strong> — full control, no external dependency, but high maintenance burden.</li>
+<li><strong>LiteLLM</strong> — community-maintained library with 100+ providers behind a unified OpenAI-compatible interface.</li>
+<li><strong>Direct OpenAI SDK only</strong> — simpler, but excludes Anthropic, Google, and local models.</li>
+</ol>
+<h3 id="decision">Decision<a class="headerlink" href="#decision" title="Permanent link">&para;</a></h3>
+<p>Use <strong>LiteLLM</strong> as the default and recommended provider layer.</p>
+<h3 id="rationale">Rationale<a class="headerlink" href="#rationale" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Single interface covers all major providers and local models (Ollama, vLLM).</li>
+<li>Active maintenance with fast updates when providers change their APIs.</li>
+<li>Users who already use LiteLLM have zero learning curve.</li>
+<li>Our <code>BaseLLMProvider</code> ABC means users can bypass LiteLLM entirely for custom backends.</li>
+</ul>
+<h3 id="consequences">Consequences<a class="headerlink" href="#consequences" title="Permanent link">&para;</a></h3>
+<ul>
+<li>LiteLLM is a required dependency (not optional).</li>
+<li>Provider-specific edge cases (e.g. streaming, function calling schemas) are abstracted away,
+  which is acceptable for canary testing where we care about content, not transport details.</li>
+<li>When LiteLLM is slow to update for a new provider, users can implement <code>BaseLLMProvider</code> directly.</li>
+</ul>
+<hr />
+<h2 id="adr-002-pydantic-v2-for-all-data-models">ADR-002: Pydantic v2 for All Data Models<a class="headerlink" href="#adr-002-pydantic-v2-for-all-data-models" title="Permanent link">&para;</a></h2>
+<p><strong>Date</strong>: 2026-06-29
+<strong>Status</strong>: Accepted</p>
+<h3 id="context_1">Context<a class="headerlink" href="#context_1" title="Permanent link">&para;</a></h3>
+<p>All data flowing through PromptCanary needs to be validated, serialisable to JSON,
+and typed for excellent IDE support.</p>
+<h3 id="options-considered_1">Options Considered<a class="headerlink" href="#options-considered_1" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>Dataclasses</strong> — stdlib, no validation, manual serialisation.</li>
+<li><strong>attrs</strong> — fast, no JSON support built-in.</li>
+<li><strong>Pydantic v1</strong> — proven, but being deprecated.</li>
+<li><strong>Pydantic v2</strong> — fastest Rust-backed validator, excellent JSON support, modern API.</li>
+<li><strong>TypedDict</strong> — typing only, no validation.</li>
+</ol>
+<h3 id="decision_1">Decision<a class="headerlink" href="#decision_1" title="Permanent link">&para;</a></h3>
+<p><strong>Pydantic v2</strong> for all domain models.</p>
+<h3 id="rationale_1">Rationale<a class="headerlink" href="#rationale_1" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>model_dump(mode="json")</code> gives free JSON serialisation.</li>
+<li>Field validators and <code>ConfigDict(frozen=True)</code> enforce correctness.</li>
+<li><code>model_validate()</code> handles deserialization from stored JSON.</li>
+<li>Best IDE support and type inference of any option.</li>
+<li>The v2 API is stable and the clear long-term choice.</li>
+</ul>
+<h3 id="consequences_1">Consequences<a class="headerlink" href="#consequences_1" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>pydantic&gt;=2.5.0</code> is a required dependency.</li>
+<li>Some patterns differ from v1 (e.g. <code>model_config = ConfigDict(...)</code> vs <code>class Config:</code>).</li>
+<li>Frozen models use <code>model_copy(update=...)</code> to "mutate" — slightly verbose but correct.</li>
+</ul>
+<hr />
+<h2 id="adr-003-sequential-provider-calls-not-async-parallel">ADR-003: Sequential Provider Calls (Not Async-Parallel)<a class="headerlink" href="#adr-003-sequential-provider-calls-not-async-parallel" title="Permanent link">&para;</a></h2>
+<p><strong>Date</strong>: 2026-06-29
+<strong>Status</strong>: Accepted (revisit at v0.2)</p>
+<h3 id="context_2">Context<a class="headerlink" href="#context_2" title="Permanent link">&para;</a></h3>
+<p>Running N prompts × M probes could be parallelised to reduce wall-clock time.</p>
+<h3 id="options-considered_2">Options Considered<a class="headerlink" href="#options-considered_2" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>Sequential</strong> — simple, predictable, easy to debug, no concurrency bugs.</li>
+<li><strong>asyncio parallel</strong> — faster but more complex, requires async provider interface.</li>
+<li><strong>ThreadPoolExecutor</strong> — parallel with sync code, but LiteLLM isn't always thread-safe.</li>
+</ol>
+<h3 id="decision_2">Decision<a class="headerlink" href="#decision_2" title="Permanent link">&para;</a></h3>
+<p><strong>Sequential</strong> for v0.1. Add <code>suite.arun()</code> (async) post-MVP.</p>
+<h3 id="rationale_2">Rationale<a class="headerlink" href="#rationale_2" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Most canary suites are small (5–20 prompts). Sequential is fast enough.</li>
+<li>Deterministic run order makes debugging and logging easier.</li>
+<li>No async complexity in the core run loop means simpler onboarding.</li>
+<li>Provider rate limits often make parallelism counterproductive anyway.</li>
+</ul>
+<h3 id="consequences_2">Consequences<a class="headerlink" href="#consequences_2" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Large suites (100+ prompts) may be slow. Document this and suggest batching.</li>
+<li><code>suite.arun()</code> is reserved for the async interface in v0.2.</li>
+</ul>
+<hr />
+<h2 id="adr-004-local-json-file-storage-for-baselines-mvp">ADR-004: Local JSON File Storage for Baselines (MVP)<a class="headerlink" href="#adr-004-local-json-file-storage-for-baselines-mvp" title="Permanent link">&para;</a></h2>
+<p><strong>Date</strong>: 2026-06-29
+<strong>Status</strong>: Accepted</p>
+<h3 id="context_3">Context<a class="headerlink" href="#context_3" title="Permanent link">&para;</a></h3>
+<p>Baselines need to be stored somewhere accessible. Options range from local files
+to cloud object stores to databases.</p>
+<h3 id="options-considered_3">Options Considered<a class="headerlink" href="#options-considered_3" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>Local JSON files</strong> — zero dependencies, git-committable, works offline.</li>
+<li><strong>SQLite</strong> — structured queries, local, more complex.</li>
+<li><strong>S3/GCS</strong> — cloud-native, requires credentials and network.</li>
+<li><strong>PostgreSQL</strong> — powerful but heavy for a CLI tool.</li>
+</ol>
+<h3 id="decision_3">Decision<a class="headerlink" href="#decision_3" title="Permanent link">&para;</a></h3>
+<p><strong>Local JSON files</strong> for MVP, with <code>BaselineStore</code> ABC enabling future backends.</p>
+<h3 id="rationale_3">Rationale<a class="headerlink" href="#rationale_3" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Teams can commit baselines to their repo alongside <code>canary.yaml</code> — gives version history for free.</li>
+<li>Zero infrastructure required to get started.</li>
+<li>The <code>BaselineStore</code> ABC (not yet exposed, but architecturally planned) allows cloud backends later.</li>
+<li>File naming convention (<code>{suite}__{model}__{timestamp}_{id}.json</code>) enables <code>load_latest()</code> via sorting.</li>
+</ul>
+<h3 id="consequences_3">Consequences<a class="headerlink" href="#consequences_3" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Large teams sharing baselines need a shared filesystem or to commit to git.</li>
+<li>No query capability (e.g., "all baselines for model X last month") beyond list/filter.</li>
+<li>S3/GCS backends are the obvious post-MVP extension.</li>
+</ul>
+<hr />
+<h2 id="adr-005-rich-typer-for-cli">ADR-005: Rich + Typer for CLI<a class="headerlink" href="#adr-005-rich-typer-for-cli" title="Permanent link">&para;</a></h2>
+<p><strong>Date</strong>: 2026-06-29
+<strong>Status</strong>: Accepted</p>
+<h3 id="options-considered_4">Options Considered<a class="headerlink" href="#options-considered_4" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>argparse (stdlib)</strong> — no external deps, verbose, no colour.</li>
+<li><strong>Click</strong> — popular, good, but lower DX than Typer.</li>
+<li><strong>Typer + Rich</strong> — type-annotated CLI, automatic help, beautiful terminal output.</li>
+</ol>
+<h3 id="decision_4">Decision<a class="headerlink" href="#decision_4" title="Permanent link">&para;</a></h3>
+<p><strong>Typer</strong> for CLI structure, <strong>Rich</strong> for all terminal rendering.</p>
+<h3 id="rationale_4">Rationale<a class="headerlink" href="#rationale_4" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Typer's type-annotation-based interface eliminates boilerplate.</li>
+<li>Rich produces world-class terminal output (tables, panels, progress bars) with minimal code.</li>
+<li>The two libraries are designed to work together.</li>
+<li>Both are battle-tested and widely used in the Python ecosystem.</li>
+</ul>
+<h3 id="consequences_4">Consequences<a class="headerlink" href="#consequences_4" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>typer</code> and <code>rich</code> are required runtime dependencies.</li>
+<li>Typer currently wraps Click, so Click is an indirect dependency.</li>
+</ul>
+<hr />
+<h2 id="adr-006-score-range-0010-with-passed-boolean">ADR-006: Score Range 0.0–1.0 with <code>passed</code> Boolean<a class="headerlink" href="#adr-006-score-range-0010-with-passed-boolean" title="Permanent link">&para;</a></h2>
+<p><strong>Date</strong>: 2026-06-29
+<strong>Status</strong>: Accepted</p>
+<h3 id="context_4">Context<a class="headerlink" href="#context_4" title="Permanent link">&para;</a></h3>
+<p>Each <code>ProbeResult</code> needs to communicate quality. Should we use pass/fail only,
+a numeric score, or a letter grade?</p>
+<h3 id="decision_5">Decision<a class="headerlink" href="#decision_5" title="Permanent link">&para;</a></h3>
+<p><strong>Both</strong>: a normalised float score (0.0–1.0) AND a boolean <code>passed</code>.</p>
+<h3 id="rationale_5">Rationale<a class="headerlink" href="#rationale_5" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>passed</code> is unambiguous for CI gating (<code>fail-on-failure</code>).</li>
+<li><code>score</code> enables partial credit (e.g., 4 of 5 required JSON keys present → 0.8).</li>
+<li>The score enables trend tracking and alerting on gradual degradation.</li>
+<li><code>DriftReport.severity</code> is derived from score deltas, not just pass/fail.</li>
+</ul>
+<h3 id="consequences_5">Consequences<a class="headerlink" href="#consequences_5" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Probe authors must populate both fields and keep them semantically consistent.</li>
+<li>The comparator's <code>regression_threshold</code> prevents noise from triggering false alarms.</li>
+</ul>
+<hr />
+<h2 id="adr-007-probe-registration-via-metaclass-free-auto-registry">ADR-007: Probe Registration via Metaclass-Free Auto-Registry<a class="headerlink" href="#adr-007-probe-registration-via-metaclass-free-auto-registry" title="Permanent link">&para;</a></h2>
+<p><strong>Date</strong>: 2026-06-29
+<strong>Status</strong>: Accepted</p>
+<h3 id="context_5">Context<a class="headerlink" href="#context_5" title="Permanent link">&para;</a></h3>
+<p>User-defined probes need to be discoverable by name (for YAML config loading).</p>
+<h3 id="options-considered_5">Options Considered<a class="headerlink" href="#options-considered_5" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>Manual registration</strong> — <code>register_probe(MyProbe)</code> call required.</li>
+<li><strong>Entry points</strong> — pip plugin system, heavy for an MVP.</li>
+<li><strong><code>__init_subclass__</code> auto-registry</strong> — Python 3.6+ feature, zero boilerplate.</li>
+</ol>
+<h3 id="decision_6">Decision<a class="headerlink" href="#decision_6" title="Permanent link">&para;</a></h3>
+<p>Use <code>__init_subclass__</code> in <code>BaseProbe</code> to auto-register any concrete subclass with a non-empty <code>probe_id</code>.</p>
+<h3 id="rationale_6">Rationale<a class="headerlink" href="#rationale_6" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Zero user friction: define the class → it's registered.</li>
+<li>No metaclass magic — plain Python.</li>
+<li>Works for built-ins and user-defined probes equally.</li>
+<li>The <code>@probe</code> decorator wraps the same mechanism for functional-style definition.</li>
+</ul>
+<h3 id="consequences_6">Consequences<a class="headerlink" href="#consequences_6" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Probes are registered at import time. Users must ensure probe modules are imported before calling <code>get_probe()</code>.</li>
+<li>For YAML-loaded custom probes, users must import their module before calling <code>CanarySuite.from_yaml()</code>.</li>
+<li>Abstract probes (those with <code>@abc.abstractmethod</code>) are not registered (correct behaviour via <code>inspect.isabstract</code>).</li>
+</ul>
+<hr />
+<h2 id="adr-008-no-llm-calls-in-the-test-suite">ADR-008: No LLM Calls in the Test Suite<a class="headerlink" href="#adr-008-no-llm-calls-in-the-test-suite" title="Permanent link">&para;</a></h2>
+<p><strong>Date</strong>: 2026-06-29
+<strong>Status</strong>: Accepted</p>
+<h3 id="context_6">Context<a class="headerlink" href="#context_6" title="Permanent link">&para;</a></h3>
+<p>Should tests make real LLM API calls?</p>
+<h3 id="decision_7">Decision<a class="headerlink" href="#decision_7" title="Permanent link">&para;</a></h3>
+<p><strong>No real API calls in any test.</strong> All tests use <code>MockLLMProvider</code> with deterministic, pre-defined responses.</p>
+<h3 id="rationale_7">Rationale<a class="headerlink" href="#rationale_7" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Tests must be reproducible, fast, and free of external dependencies.</li>
+<li>Real API calls would require secrets in CI, add cost, and introduce flakiness.</li>
+<li>Integration tests with real providers should be an opt-in, separate test suite (<code>tests/live/</code>).</li>
+<li>The <code>MockLLMProvider</code> in <code>conftest.py</code> is realistic enough to exercise the full pipeline.</li>
+</ul>
+<h3 id="consequences_7">Consequences<a class="headerlink" href="#consequences_7" title="Permanent link">&para;</a></h3>
+<ul>
+<li>No test coverage of real provider response parsing subtleties.</li>
+<li><code>tests/live/</code> (not yet created) will contain real-provider smoke tests run manually or with a dedicated secret.</li>
+</ul>
+<hr />
+<h2 id="adr-009-visualization-degrades-gracefully-ascii-first-plotly-optional">ADR-009: Visualization Degrades Gracefully — ASCII First, Plotly Optional<a class="headerlink" href="#adr-009-visualization-degrades-gracefully-ascii-first-plotly-optional" title="Permanent link">&para;</a></h2>
+<p><strong>Date</strong>: 2026-06-30
+<strong>Status</strong>: Accepted</p>
+<h3 id="context_7">Context<a class="headerlink" href="#context_7" title="Permanent link">&para;</a></h3>
+<p>The original project guideline calls for "rich notebook + HTML reports as a
+core delight factor." This requires a charting library, but PromptCanary's
+core philosophy is minimal required dependencies.</p>
+<h3 id="options-considered_6">Options Considered<a class="headerlink" href="#options-considered_6" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>Require Plotly in core</strong> — best visuals, but bloats every install,
+   even for users who only need the CLI.</li>
+<li><strong>Matplotlib</strong> — lighter than Plotly, but static images don't suit
+   notebook/HTML delight goals as well as interactive charts.</li>
+<li><strong>ASCII-first with optional Plotly</strong> — zero-dependency baseline that
+   always works, with a strictly additive optional upgrade path.</li>
+</ol>
+<h3 id="decision_8">Decision<a class="headerlink" href="#decision_8" title="Permanent link">&para;</a></h3>
+<p><strong>ASCII-first with optional Plotly</strong>, selected via <code>pip install promptcanary[viz]</code>.
+<code>mode="auto"</code> (the default) detects Plotly's availability and falls back
+to ASCII rendering with zero loss of information — every chart type
+(score history, probe heatmap, drift timeline) has both a Plotly and an
+ASCII implementation.</p>
+<h3 id="rationale_8">Rationale<a class="headerlink" href="#rationale_8" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Matches ADR-002's "minimal dependencies" principle: the CLI and core SDK
+  remain installable with no charting library at all.</li>
+<li>Terminal sparklines and tables are still genuinely useful in a CI log
+  where no browser is available to view an HTML file anyway.</li>
+<li>The interactive HTML output (self-contained, dark-themed, matching the
+  existing report aesthetic) satisfies the "delight factor" goal for users
+  who do install the extra.</li>
+<li>No silent failures: missing Plotly never raises an exception, it just
+  changes which renderer is used.</li>
+</ul>
+<h3 id="consequences_8">Consequences<a class="headerlink" href="#consequences_8" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Two implementations must be kept in sync for every new chart type added
+  (a maintenance cost, accepted as worth it for the dependency guarantee).</li>
+<li><code>tests/unit/test_visualization.py</code> skips Plotly-specific assertions via
+  <code>pytest.mark.skipif(not _plotly_available())</code>. The <code>ci.yml</code> <code>test</code> job
+  installs only <code>[dev]</code> (not <code>[viz]</code>), so those assertions are skipped in
+  standard CI runs; the ASCII-rendering code path is what's continuously
+  verified. The Plotly-rendering path is exercised by installing <code>[viz]</code>
+  locally (or in a dedicated CI matrix leg, not yet added — see ADR-011).</li>
+</ul>
+<hr />
+<h2 id="adr-011-viz-extra-does-not-include-pandas">ADR-011: <code>[viz]</code> Extra Does Not Include pandas<a class="headerlink" href="#adr-011-viz-extra-does-not-include-pandas" title="Permanent link">&para;</a></h2>
+<p><strong>Date</strong>: 2026-07-03
+<strong>Status</strong>: Accepted</p>
+<h3 id="context_8">Context<a class="headerlink" href="#context_8" title="Permanent link">&para;</a></h3>
+<p>The original <code>[viz]</code> extra declared both <code>plotly</code> and <code>pandas</code>. An audit
+found <code>pandas</code> was never actually imported anywhere in the codebase — only
+mentioned in a docstring — and it was the sole source of a transitive
+<code>numpy</code> dependency.</p>
+<h3 id="the-problem-this-caused">The problem this caused<a class="headerlink" href="#the-problem-this-caused" title="Permanent link">&para;</a></h3>
+<p><code>numpy</code> 2.5 ships type stubs using unconditional PEP 695 syntax
+(<code>type X = ...</code> statements) that only parse under Python 3.12+. Our
+<code>[tool.mypy]</code> config pins <code>python_version = "3.10"</code> deliberately, since
+<code>promptcanary</code> supports 3.10+ and we want mypy to catch any accidental use
+of newer-than-3.10 syntax in our own code. When <code>numpy</code> was present in the
+environment (via <code>pandas</code>, via <code>[viz]</code>), <code>mypy promptcanary/</code> failed with
+a hard parse error on numpy's own stub file — before mypy could even begin
+checking our code — regardless of <code>ignore_missing_imports</code>, per-module
+<code>ignore_errors</code>, or <code>follow_imports = "skip"</code> overrides, none of which
+prevent a stub <em>parse</em> failure (as opposed to suppressing reported errors
+after a successful parse).</p>
+<h3 id="options-considered_7">Options Considered<a class="headerlink" href="#options-considered_7" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>Raise <code>python_version</code> to 3.12 project-wide</strong> — fixes the parse issue,
+   but silently permits 3.11/3.12-only syntax in our own code while we
+   claim 3.10+ runtime support. Rejected: too large a blast radius for a
+   dependency we don't even use.</li>
+<li><strong>Per-module mypy overrides targeting numpy</strong> — tried <code>ignore_errors</code>
+   and <code>follow_imports = "skip"</code>; neither prevented the parse failure,
+   because <code>pandas</code>'s own stubs import <code>numpy</code> internally, forcing
+   resolution regardless of overrides on our side.</li>
+<li><strong>Remove the unused <code>pandas</code> dependency entirely</strong> — <code>plotly</code> alone
+   (verified via a clean isolated install) does not pull in <code>numpy</code> at
+   all. Since <code>pandas</code> was dead weight to begin with, this fixes the mypy
+   issue at its root instead of working around a symptom.</li>
+</ol>
+<h3 id="decision_9">Decision<a class="headerlink" href="#decision_9" title="Permanent link">&para;</a></h3>
+<p>Removed <code>pandas</code> from <code>[viz]</code>. <code>viz = ["plotly&gt;=5.18.0"]</code> only.</p>
+<h3 id="rationale_9">Rationale<a class="headerlink" href="#rationale_9" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>pandas</code> was never used — removing it is a pure simplification, not a
+  functionality trade-off.</li>
+<li>Fixing the root cause (an unused, unnecessarily-heavy dependency) beats
+  adding mypy configuration complexity to work around a problem that
+  dependency shouldn't have introduced in the first place.</li>
+<li>Discovered via a clean-room verification: installing <em>only</em> what
+  <code>pyproject.toml</code> declares into a fresh virtualenv, rather than trusting
+  a development environment that had accumulated packages from earlier ad
+  hoc <code>pip install</code> commands. This is now standard practice before any
+  release — see the release checklist in <code>CONTRIBUTING.md</code>.</li>
+</ul>
+<h3 id="consequences_9">Consequences<a class="headerlink" href="#consequences_9" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>promptcanary[viz]</code> installs faster and lighter (no <code>numpy</code>/<code>pandas</code>
+  pulled in transitively).</li>
+<li>If a genuine <code>pandas</code> need arises later (e.g. a tabular export feature),
+  re-adding it will require re-litigating this ADR and re-solving the
+  numpy/mypy stub-parsing interaction — most likely via option 1
+  (bumping <code>python_version</code>) if by then our minimum supported Python has
+  also moved to 3.12+, which would make the trade-off moot.</li>
+</ul>
+<hr />
+<h2 id="adr-010-tool-use-probes-parse-multiple-provider-formats-natively">ADR-010: Tool-Use Probes Parse Multiple Provider Formats Natively<a class="headerlink" href="#adr-010-tool-use-probes-parse-multiple-provider-formats-natively" title="Permanent link">&para;</a></h2>
+<p><strong>Date</strong>: 2026-06-30
+<strong>Status</strong>: Accepted</p>
+<h3 id="context_9">Context<a class="headerlink" href="#context_9" title="Permanent link">&para;</a></h3>
+<p>Agent/tool-calling JSON shapes differ meaningfully across providers: OpenAI
+nests arguments as a JSON-<em>encoded string</em> inside <code>tool_calls[].function</code>,
+Anthropic uses a top-level <code>name</code>/<code>input</code> pair, and many custom agent
+frameworks use a simpler <code>{"function": ..., "args": ...}</code> shape.</p>
+<h3 id="options-considered_8">Options Considered<a class="headerlink" href="#options-considered_8" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>Require users to specify the format</strong> — explicit, but adds friction
+   and a config option most users won't know how to set correctly.</li>
+<li><strong>One probe per provider format</strong> — clear, but multiplies the probe
+   count and forces users to know which provider format applies in
+   multi-provider suites.</li>
+<li><strong>Auto-detecting parser that tries all known shapes</strong> — most convenient,
+   accepted complexity is contained entirely inside the probe's private
+   extraction methods.</li>
+</ol>
+<h3 id="decision_10">Decision<a class="headerlink" href="#decision_10" title="Permanent link">&para;</a></h3>
+<p><strong>Auto-detecting parser</strong> inside each tool-use probe's private
+<code>_extract_function_names()</code> / <code>_extract_arg_keys()</code> methods. Public API
+stays format-agnostic — <code>ToolCallNameProbe("search_web")</code> works
+identically whether the response came from OpenAI, Anthropic, or a custom
+JSON shape.</p>
+<h3 id="rationale_10">Rationale<a class="headerlink" href="#rationale_10" title="Permanent link">&para;</a></h3>
+<ul>
+<li>The entire point of a canary suite is testing the <em>same</em> prompt across
+  multiple providers — forcing per-provider probe configuration would
+  defeat that goal for the highest-value tool-use use case (the
+  multi-provider matrix described in the CI/CD docs).</li>
+<li>The extraction logic is internal and probe-scoped, so adding a new
+  provider format later means editing one private method, not a public
+  API change.</li>
+</ul>
+<h3 id="consequences_10">Consequences<a class="headerlink" href="#consequences_10" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Probe internals are more complex than other probe categories (multiple
+  parsing branches with fallbacks).</li>
+<li>A genuinely novel tool-call format not yet seen in the wild may not
+  parse correctly until a maintainer adds support — mitigated by the
+  <code>text</code> fallback strategy in <code>ToolCallPresenceProbe</code>, which catches most
+  unrecognized-but-JSON-like shapes via regex.</li>
+</ul>
+<hr />
+<p><em>Last updated: 2026-06-30 (v0.1.x, unreleased)</em></p>
+
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; 2026 PromptCanary Contributors — MIT License
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://github.com/Mattral/PromptCanary" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://pypi.org/project/promptcanary/" target="_blank" rel="noopener" title="pypi.org" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.8 200.5c-7.7-30.9-22.3-54.2-53.4-54.2h-40.1v47.4c0 36.8-31.2 67.8-66.8 67.8H172.7c-29.2 0-53.4 25-53.4 54.3v101.8c0 29 25.2 46 53.4 54.3 33.8 9.9 66.3 11.7 106.8 0 26.9-7.8 53.4-23.5 53.4-54.3v-40.7H226.2v-13.6h160.2c31.1 0 42.6-21.7 53.4-54.2 11.2-33.5 10.7-65.7 0-108.6M286.2 444.7a20.4 20.4 0 1 1 0-40.7 20.4 20.4 0 1 1 0 40.7M167.8 248.1h106.8c29.7 0 53.4-24.5 53.4-54.3V91.9c0-29-24.4-50.7-53.4-55.6-35.8-5.9-74.7-5.6-106.8.1-45.2 8-53.4 24.7-53.4 55.6v40.7h106.9v13.6h-147c-31.1 0-58.3 18.7-66.8 54.2-9.8 40.7-10.2 66.1 0 108.6 7.6 31.6 25.7 54.2 56.8 54.2H101v-48.8c0-35.3 30.5-66.4 66.8-66.4m-6.6-183.4a20.4 20.4 0 1 1 0 40.8 20.4 20.4 0 1 1 0-40.8"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.tabs", "navigation.sections", "navigation.indexes", "navigation.top", "content.code.copy", "content.code.annotate", "search.suggest", "search.highlight", "toc.follow"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>
