@@ -198,6 +198,7 @@ Before opening a PR, please ensure:
 - [ ] Type check passes: `mypy promptcanary/ --ignore-missing-imports`
 - [ ] Docstrings on all public classes/methods
 - [ ] `CHANGELOG.md` updated under `[Unreleased]`
+- [ ] If this PR adds or hand-edits a `.ipynb` file: `python scripts/validate_notebooks.py` passes (a hand-edited notebook can look fine in your editor and still be invalid JSON — this has happened before; see `CHANGELOG.md` v0.2.x)
 - [ ] PR description explains the **what** and the **why**
 
 These are exactly the checks `.github/workflows/ci.yml` runs — if they pass
