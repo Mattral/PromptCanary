@@ -28,6 +28,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.2.3] — 2026-07-04
+
+### Fixed
+
+- `notebooks/custom_probes.ipynb` failed to open in Google Colab with `SyntaxError: Expected double-quoted property name in JSON at position 15924`. Root cause: a stray `\n",` fragment — left over from an earlier manual edit — immediately after the `kernelspec` object in the notebook's metadata block, which made the file invalid JSON. The file happened to still open in some tools despite this, which is how it shipped unnoticed; Colab's stricter parser caught it correctly. Fixed by removing the six-character artifact.
+- All four notebooks were also missing per-cell `id` fields, required as of nbformat 4.5 (which every notebook in this repo declares via `nbformat_minor: 5`) and flagged by `nbformat.validate()` as `MissingIDFieldWarning`, "will become a hard error in future nbformat versions." Fixed by round-tripping every notebook through `nbformat`'s reader/writer, which transparently backfills missing ids.
+
+### Added
+
+- `scripts/validate_notebooks.py` — validates every notebook under `notebooks/` as well-formed JSON, schema-valid nbformat, and free of duplicate cell ids. Written directly in response to the incident above: this exact class of corruption (valid-looking file, invalid JSON) is precisely what this script checks for before a notebook ships, rather than relying on it being caught by whichever tool a user happens to open it with next.
+- `.github/workflows/ci.yml` — new `notebooks` job runs the validator on every push and PR; `build` now depends on it passing, so a corrupted notebook blocks a release the same way a failing test would.
+- `CONTRIBUTING.md` — PR checklist now includes running the notebook validator for any PR that adds or hand-edits a `.ipynb` file.
+
+---
+
 ## [0.2.2] — 2026-07-04
 
 ### Fixed
@@ -253,7 +268,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-[Unreleased]: https://github.com/Mattral/PromptCanary/compare/v0.2.2...HEAD
+[Unreleased]: https://github.com/Mattral/PromptCanary/compare/v0.2.3...HEAD
+[0.2.3]: https://github.com/Mattral/PromptCanary/compare/v0.2.2...v0.2.3
 [0.2.2]: https://github.com/Mattral/PromptCanary/compare/v0.2.1...v0.2.2
 [0.2.1]: https://github.com/Mattral/PromptCanary/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/Mattral/PromptCanary/compare/v0.1.0...v0.2.0
