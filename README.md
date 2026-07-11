@@ -24,12 +24,13 @@
   <a href="https://hits.sh/github.com/Mattral/PromptCanary/">
     <img alt="Hits" src="https://hits.sh/github.com/Mattral/PromptCanary.svg?style=for-the-badge&color=10B981&label=views">
   </a>
+    <a href="https://pypi.org/project/promptcanary/"><img alt="Downloads" src="https://img.shields.io/pypi/dm/promptcanary?style=for-the-badge&color=A78BFA"></a>
+  <a href="https://pepy.tech/project/promptcanary">  <img alt="Total Downloads" src="https://img.shields.io/pepy/dt/promptcanary?style=for-the-badge&color=F87171"></a>
   <p align="center">
   <a href="https://github.com/Mattral/PromptCanary/tree/main/notebooks">
     <img src="https://img.shields.io/badge/Open_in_Colab-Notebooks-7C3AED?style=for-the-badge&logo=googlecolab&logoColor=white" alt="Open Notebooks in Colab">
   </a>
-  <a href="https://pypi.org/project/promptcanary/"><img alt="Downloads" src="https://img.shields.io/pypi/dm/promptcanary?style=for-the-badge&color=A78BFA"></a>
-  <a href="https://pepy.tech/project/promptcanary">  <img alt="Total Downloads" src="https://img.shields.io/pepy/dt/promptcanary?style=for-the-badge&color=F87171"></a>
+
 </p>
 </p>
 
